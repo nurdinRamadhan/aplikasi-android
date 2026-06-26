@@ -1,0 +1,68 @@
+﻿# MASTER PROMPT: KOTLIN/ANDROID FORUM ALUMNI INTEGRATION (META STYLE)
+# PROJECT: AL-HASANAH MEDIA APP
+
+Anda adalah Senior Android Developer (Kotlin/Compose). Tugas Anda adalah membangun fitur "Forum Alumni" yang interaktif ke dalam aplikasi Android Al-Hasanah Media, dengan backend Supabase yang sudah terintegrasi.
+
+## 1. DATA & AUTH ARCHITECTURE CONTEXT
+Sistem keamanan berbasis RBAC (Role Based Access Control) yang dikelola via Admin Panel.
+- **Backend**: Supabase (Auth & PostgreSQL).
+- **Primary Auth Table**: `public.profiles`
+  - Kolom Krusial: `id` (UUID), `role` (String), `is_active` (Boolean).
+- **Alumni Meta Table**: `public.alumni_data` (Relasi 1:1 ke profiles)
+  - `id` (PK, refs public.profiles.id)
+  - `full_name`, `tahun_lulus` (Int), `no_wa`, `profesi_sekarang`, `instansi_kerja`, `alamat_domisili`.
+
+**Business Logic**:
+1. Alumni mendaftar -> Akun Auth tercipta -> Row di `profiles` tercipta dengan `role: 'alumni'` dan `is_active: false`.
+2. Alumni **TIDAK BISA** login ke Forum jika `is_active == false`.
+3. Admin memverifikasi via Admin Panel -> `is_active` menjadi `true` -> Akses Forum terbuka.
+
+## 2. DATABASE SCHEMA REQUIREMENTS (SQL TO BE EXECUTED)
+Anda harus menginisialisasi tabel forum berikut di Supabase:
+
+```sql
+CREATE TABLE public.forum_threads (
+  id uuid primary key default gen_random_uuid(),
+  author_id uuid references public.profiles(id) on delete cascade,
+  title text,
+  content text not null,
+  image_url text, -- Support untuk posting gambar kenangan
+  created_at timestamp with time zone default now()
+);
+
+CREATE TABLE public.forum_comments (
+  id uuid primary key default gen_random_uuid(),
+  thread_id uuid references public.forum_threads(id) on delete cascade,
+  author_id uuid references public.profiles(id) on delete cascade,
+  comment_text text not null,
+  created_at timestamp with time zone default now()
+);
+```
+
+## 3. UI/UX REQUIREMENTS: THE "THREADS/META" STYLE
+Implementasikan desain yang "Social-First" dan minimalis:
+- **Dynamic Navigation**: Setelah login, aplikasi harus mengecek profil user. 
+  - Jika `role == 'wali'`, arahkan ke `WaliDashboard`.
+  - Jika `role == 'alumni'`, arahkan ke `AlumniSocialFeed`.
+- **Feed Interface**:
+  - `LazyColumn` dengan item card yang memiliki: Profil sirkular, nama (bold), profesi & angkatan (sub-text), body text, dan media attachment.
+  - Interaction bar: Love (animation), Reply, dan Share.
+  - Thread lines: Garis vertikal yang menghubungkan post utama dengan komentar di bawahnya.
+- **Registration Flow**: Form multi-step untuk mengumpulkan data Email/Password sekaligus data profil alumni (`tahun_lulus`, `profesi`, dll).
+
+## 4. ANDROID TECHNICAL STACK
+- **Language**: Kotlin 2.x
+- **UI Framework**: Jetpack Compose (Material 3).
+- **Networking**: Supabase-kt (Compose/Kotlin Multiplatform compatible).
+- **Image Loading**: Coil dengan dukungan caching.
+- **Architecture**: MVVM dengan Repository Pattern.
+- **Dependency Injection**: Hilt atau Koin.
+
+## 5. REFINEMENT & STANDARDS
+- **Localization**: Semua teks dalam Bahasa Indonesia yang sopan (nuansa pesantren).
+- **Theming**: 
+  - Light Mode: Emerald Green (`#059669`) sebagai primary.
+  - Dark Mode: Deep Black (`#000000`) dengan aksen Gold/Amber (`#ffb700`).
+- **Error Handling**: Tampilkan State UI khusus jika user `role: 'alumni'` tapi `is_active: false` (Pesan: "Menunggu Verifikasi Admin").
+
+Silakan lakukan analisis skema ini dan mulai dengan mengimplementasikan Repository untuk Auth dan Alumni Profile.

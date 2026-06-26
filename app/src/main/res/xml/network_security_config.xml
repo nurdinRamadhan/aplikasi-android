@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="false">sldobkbolvrahlnowrga.supabase.co</domain>
+        <pin-set expiration="2027-12-31">
+            <pin digest="SHA-256">p51goejPCgGH+Oog/MU2k6PObcEfTrrr73jUcuWJ7w0=</pin>
+            <pin digest="SHA-256">kIdp6NNEd8wsugYyyIYFsi1ylMCED3hZbSR8ZFsa/A4=</pin>
+        </pin-set>
+    </domain-config>
+
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="false">api.sandbox.midtrans.com</domain>
+        <pin-set expiration="2027-12-31">
+            <pin digest="SHA-256">L+vWv8j3xltQLYDtg/eDrST7ork+GZ5U219BlLmsrQY=</pin>
+            <pin digest="SHA-256">tSKs11FY+t+OiV6hm/mSlWQUaWgagXPPRSh2iHTmZu8=</pin>
+        </pin-set>
+    </domain-config>
+
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="false">api.midtrans.com</domain>
+        <pin-set expiration="2027-12-31">
+            <pin digest="SHA-256">tSKs11FY+t+OiV6hm/mSlWQUaWgagXPPRSh2iHTmZu8=</pin>
+            <pin digest="SHA-256">L+vWv8j3xltQLYDtg/eDrST7ork+GZ5U219BlLmsrQY=</pin>
+        </pin-set>
+    </domain-config>
+
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="false">alhasanah-media.vercel.app</domain>
+        <pin-set expiration="2027-12-31">
+            <pin digest="SHA-256">fndKWNHkmWFva8LCkbaQ6j1HS5JLIT9dD8JdQm41s7o=</pin>
+            <pin digest="SHA-256">yDu9og255NN5GEf+Bwa9rTrqFQ0EydZ0r1FCh9TdAW4=</pin>
+            <pin digest="SHA-256">hxqRlPTu1bMS/0DITB1SSu0vd4u/8l8TjPgfaAp63Gc=</pin>
+        </pin-set>
+    </domain-config>
+</network-security-config>

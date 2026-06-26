@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>User Manual & Operational Guide - Al-Hasanah Media Android</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #1f2933; line-height: 1.45; }
+    h1 { color: #0f172a; font-size: 28px; border-bottom: 3px solid #b88418; padding-bottom: 10px; }
+    h2 { color: #12372a; font-size: 20px; margin-top: 28px; border-bottom: 1px solid #d8c08a; padding-bottom: 5px; }
+    h3 { color: #2d3a31; font-size: 16px; margin-top: 18px; }
+    p { margin: 7px 0; }
+    ul, ol { margin-top: 6px; }
+    li { margin: 4px 0; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 12px; }
+    th { background: #12372a; color: white; text-align: left; }
+    th, td { border: 1px solid #cbd5df; padding: 7px; vertical-align: top; }
+    .meta { background: #fbf7e8; border: 1px solid #e8d49c; padding: 12px; margin: 12px 0 18px; }
+    .note { background: #eef7f2; border-left: 4px solid #2e7d32; padding: 10px; margin: 12px 0; }
+    .warn { background: #fff4e5; border-left: 4px solid #c77700; padding: 10px; margin: 12px 0; }
+    .danger { background: #ffebee; border-left: 4px solid #c62828; padding: 10px; margin: 12px 0; }
+    .small { font-size: 12px; color: #52616b; }
+  </style>
+</head>
+<body>
+  <h1>User Manual & Operational Guide<br>Al-Hasanah Media Android</h1>
+
+  <div class="meta">
+    <p><strong>Versi dokumen:</strong> 2.0 Produksi</p>
+    <p><strong>Tanggal pembaruan:</strong> 23 Mei 2026</p>
+    <p><strong>Platform:</strong> Aplikasi Android Al-Hasanah Media</p>
+    <p><strong>Ditujukan untuk:</strong> Wali santri, alumni, petugas kantin, donatur, dan pengguna layanan publik aplikasi.</p>
+    <p><strong>Catatan ruang lingkup:</strong> Dokumen ini menjelaskan aplikasi Android. Dokumen ini bukan panduan Admin Panel dan tidak menjelaskan alur kerja operator backend secara rinci.</p>
+  </div>
+
+  <h2>1. Ringkasan Aplikasi</h2>
+  <p>Al-Hasanah Media Android adalah aplikasi pendamping pesantren untuk memantau data santri, menerima notifikasi resmi, melakukan pembayaran, mengelola Dompet Santri, menggunakan layanan alumni, membaca konten keislaman digital, berdonasi, dan mengakses fitur publik pesantren.</p>
+  <p>Aplikasi ini bukan tempat untuk mengubah data administrasi pesantren. Data santri, tagihan, hafalan, kedisiplinan, perizinan, kesehatan, berita, dan prestasi dicatat oleh pengurus melalui sistem resmi. Aplikasi Android menampilkan data tersebut kepada pengguna yang berhak.</p>
+
+  <h3>1.1 Kelompok Pengguna</h3>
+  <table>
+    <tr><th>Pengguna</th><th>Akses Utama</th><th>Catatan</th></tr>
+    <tr><td>Wali santri</td><td>Profil santri, hafalan, murojaah, kitab, kedisiplinan, kesehatan, perizinan, tagihan, Dompet Santri, notifikasi, donasi, dan fitur publik.</td><td>Data yang tampil sesuai santri yang terhubung dengan akun wali.</td></tr>
+    <tr><td>Alumni</td><td>Registrasi alumni, profil alumni, direktori, forum, follow, komentar, reaction, laporan konten, chat alumni terenkripsi, dan notifikasi.</td><td>Fitur alumni mengikuti status verifikasi dan hak akses akun.</td></tr>
+    <tr><td>Petugas kantin</td><td>Transaksi Dompet Santri melalui perangkat kantin yang terdaftar.</td><td>Hanya tersedia untuk akun role kantin dan perangkat yang aktif.</td></tr>
+    <tr><td>Pengguna umum/donatur</td><td>Berita, donasi, Al-Quran digital, jadwal sholat, cuaca, arah kiblat, hadis, kalender Islam, panduan ibadah, dan Tanya AI publik.</td><td>Fitur tertentu tetap memerlukan login agar data personal dan notifikasi dapat dikirim.</td></tr>
+  </table>
+
+  <h2>2. Instalasi, Login, dan Navigasi Dasar</h2>
+  <h3>2.1 Instalasi</h3>
+  <ol>
+    <li>Pasang aplikasi dari file APK atau sumber resmi yang diberikan pesantren.</li>
+    <li>Buka aplikasi dan izinkan notifikasi jika perangkat menampilkan permintaan izin.</li>
+    <li>Pastikan koneksi internet aktif saat pertama kali login.</li>
+  </ol>
+
+  <h3>2.2 Login</h3>
+  <ol>
+    <li>Buka halaman login.</li>
+    <li>Masukkan alamat email akun.</li>
+    <li>Masukkan kata sandi.</li>
+    <li>Tekan <strong>Masuk ke Akun</strong>.</li>
+  </ol>
+  <p>Jika login gagal, periksa email, kata sandi, koneksi internet, dan status akun. Jika akun belum dibuat atau belum aktif, hubungi pengurus pesantren.</p>
+
+  <h3>2.3 Navigasi</h3>
+  <p>Aplikasi menggunakan Beranda, menu navigasi bawah, drawer/menu samping, dan kartu fitur. Menu yang tampil dapat berbeda sesuai status login dan role pengguna.</p>
+  <ul>
+    <li>Gunakan <strong>Beranda</strong> untuk melihat ringkasan dan akses cepat.</li>
+    <li>Gunakan ikon notifikasi untuk membuka pusat notifikasi.</li>
+    <li>Gunakan tombol kembali di bagian atas halaman untuk kembali ke layar sebelumnya.</li>
+    <li>Gunakan menu tema jika tersedia untuk mengganti tampilan terang/gelap.</li>
+  </ul>
+
+  <h2>3. Beranda</h2>
+  <p>Beranda adalah pusat aktivitas aplikasi. Pengguna dapat melihat akses cepat ke data santri, layanan keuangan, fitur ibadah, berita, Tanya AI, alumni, dan notifikasi.</p>
+  <h3>Cara menggunakan Beranda</h3>
+  <ol>
+    <li>Buka aplikasi setelah login.</li>
+    <li>Pilih kartu atau ikon fitur yang ingin digunakan.</li>
+    <li>Jika memiliki lebih dari satu santri, pastikan santri aktif sudah sesuai sebelum membuka data detail.</li>
+    <li>Tarik ulang halaman atau buka kembali menu jika data belum tampil karena koneksi lambat.</li>
+  </ol>
+
+  <h2>4. Profil dan Monitoring Santri</h2>
+  <p>Fitur santri bersifat monitoring. Wali dapat melihat data anak yang terhubung dengan akun, tetapi tidak mengubah data akademik, kesantrian, kesehatan, atau tagihan dari aplikasi Android.</p>
+
+  <h3>4.1 Daftar dan Profil Santri</h3>
+  <ol>
+    <li>Buka menu <strong>Santri</strong> atau pilih kartu santri dari Beranda.</li>
+    <li>Pilih santri yang ingin dilihat.</li>
+    <li>Lihat profil, kelas, jurusan, foto, dan informasi lain yang tersedia.</li>
+  </ol>
+  <p>Jika data profil tidak sesuai, hubungi pengurus pesantren untuk koreksi data.</p>
+
+  <h3>4.2 Hafalan Al-Quran</h3>
+  <ol>
+    <li>Buka menu <strong>Hafalan</strong>.</li>
+    <li>Pilih santri jika diminta.</li>
+    <li>Lihat ringkasan hafalan, riwayat setoran, capaian, dan catatan yang tersedia.</li>
+  </ol>
+  <p>Data hafalan dibuat oleh pengurus/ustadz. Wali tidak menginput setoran dari aplikasi.</p>
+
+  <h3>4.3 Murojaah</h3>
+  <ol>
+    <li>Buka menu <strong>Murojaah</strong>.</li>
+    <li>Lihat riwayat pengulangan hafalan dan catatan perkembangan.</li>
+    <li>Gunakan informasi ini untuk memantau konsistensi santri.</li>
+  </ol>
+
+  <h3>4.4 Hafalan Kitab</h3>
+  <ol>
+    <li>Buka menu <strong>Hafalan Kitab</strong>.</li>
+    <li>Lihat daftar kitab, capaian, tanggal, dan catatan yang tersedia.</li>
+  </ol>
+
+  <h3>4.5 Catatan Kedisiplinan</h3>
+  <ol>
+    <li>Buka menu <strong>Catatan Kedisiplinan</strong> atau <strong>Pelanggaran</strong>.</li>
+    <li>Lihat daftar catatan, tanggal, jenis pembinaan, poin, hukuman/pembinaan, dan catatan pengurus.</li>
+    <li>Gunakan filter jika tersedia untuk melihat catatan tertentu.</li>
+  </ol>
+  <p>Notifikasi kedisiplinan dikirim dengan bahasa pembinaan agar wali dapat mendampingi santri dengan tenang.</p>
+
+  <h3>4.6 Rekam Medis/Kesehatan</h3>
+  <ol>
+    <li>Buka menu <strong>Kesehatan</strong> atau <strong>Rekam Medis</strong>.</li>
+    <li>Lihat tanggal, keluhan, tindakan, dan catatan dari petugas kesehatan.</li>
+  </ol>
+  <p class="danger">Data kesehatan bersifat sensitif. Jangan menyebarkan screenshot atau isi rekam medis tanpa kepentingan yang sah.</p>
+
+  <h3>4.7 Perizinan Santri</h3>
+  <ol>
+    <li>Buka menu <strong>Perizinan</strong>.</li>
+    <li>Lihat jenis izin, tanggal izin, tanggal kembali, keterangan, dan status.</li>
+    <li>Status dapat berupa sedang ditinjau, disetujui, ditolak, keluar, atau sudah kembali sesuai data pesantren.</li>
+  </ol>
+  <p>Notifikasi perizinan dikirim saat izin baru dibuat atau status berubah, termasuk saat disetujui, ditolak, dan ketika santri sudah kembali.</p>
+
+  <h3>4.8 Prestasi Santri</h3>
+  <ol>
+    <li>Buka menu <strong>Prestasi</strong>.</li>
+    <li>Lihat daftar santri berprestasi, kategori, judul prestasi, tanggal, poin, dan keterangan.</li>
+    <li>Gunakan pencarian atau filter kategori jika tersedia.</li>
+  </ol>
+  <p>Jika anak wali santri mendapatkan prestasi baru, aplikasi mengirim notifikasi prestasi kepada akun wali terkait.</p>
+
+  <h2>5. Tagihan, SPP, dan Pembayaran</h2>
+  <p>Modul keuangan menampilkan tagihan santri dan status pembayaran. Modul ini online-first karena status pembayaran harus selalu cocok dengan server dan Midtrans.</p>
+
+  <h3>5.1 Melihat Tagihan</h3>
+  <ol>
+    <li>Buka menu <strong>Tagihan/SPP</strong> atau <strong>Keuangan</strong>.</li>
+    <li>Pilih santri.</li>
+    <li>Lihat daftar tagihan, nominal, sisa tagihan, status, dan keterangan.</li>
+  </ol>
+
+  <h3>5.2 Membayar Tagihan</h3>
+  <ol>
+    <li>Buka detail tagihan.</li>
+    <li>Tekan tombol pembayaran.</li>
+    <li>Pilih metode pembayaran: QRIS, GoPay, BCA VA, BNI VA, BRI VA, Permata VA, Mandiri Bill Payment, Alfamart, atau Indomaret.</li>
+    <li>Tekan <strong>Lanjutkan Pembayaran</strong>.</li>
+    <li>Ikuti instruksi pembayaran sesuai metode yang dipilih.</li>
+  </ol>
+
+  <h3>5.3 Setelah Pembayaran</h3>
+  <ul>
+    <li>Aplikasi memantau status pembayaran dari server.</li>
+    <li>Jika pembayaran berhasil, aplikasi menampilkan hasil sukses secara otomatis setelah status dikonfirmasi.</li>
+    <li>Tombol cek status tetap tersedia untuk kondisi jaringan lambat.</li>
+    <li>Notifikasi pembayaran tagihan berhasil dikirim dengan bahasa yang ramah.</li>
+  </ul>
+
+  <h2>6. Dompet Santri</h2>
+  <p>Dompet Santri adalah fitur saldo digital santri untuk transaksi yang diizinkan pesantren, terutama kantin. Saldo dan transaksi selalu mengacu pada ledger resmi di backend.</p>
+
+  <h3>6.1 Membuka Dompet Santri</h3>
+  <ol>
+    <li>Buka menu <strong>Dompet Santri</strong>.</li>
+    <li>Pilih santri yang ingin dilihat.</li>
+    <li>Lihat saldo, status dompet, limit, dan riwayat transaksi.</li>
+  </ol>
+
+  <h3>6.2 Aktivasi dan PIN</h3>
+  <ol>
+    <li>Ikuti instruksi aktivasi jika dompet belum aktif.</li>
+    <li>Buat atau gunakan PIN sesuai instruksi aplikasi.</li>
+    <li>Jaga PIN. Jangan berikan kepada petugas, pengurus, teman, atau pihak lain.</li>
+  </ol>
+
+  <h3>6.3 Top Up Dompet</h3>
+  <ol>
+    <li>Buka Dompet Santri.</li>
+    <li>Pilih menu top up.</li>
+    <li>Masukkan nominal.</li>
+    <li>Pilih metode pembayaran.</li>
+    <li>Ikuti instruksi hingga pembayaran selesai.</li>
+  </ol>
+  <p>Saldo masuk setelah pembayaran berhasil dikonfirmasi server.</p>
+
+  <h3>6.4 Limit, Approval, dan Keamanan</h3>
+  <ul>
+    <li>Wali dapat mengatur limit harian/bulanan jika fitur tersedia.</li>
+    <li>Transaksi tertentu dapat membutuhkan persetujuan wali.</li>
+    <li>Transaksi besar, saldo rendah, PIN salah berulang, dispute, atau aktivitas berisiko dapat memicu notifikasi.</li>
+  </ul>
+
+  <h3>6.5 Riwayat dan Filter</h3>
+  <ol>
+    <li>Buka tab riwayat transaksi dompet.</li>
+    <li>Gunakan filter seperti minggu ini, minggu lalu, bulan ini, bulan lalu, 3 bulan, masuk, atau keluar.</li>
+    <li>Tekan reset filter untuk kembali ke tampilan semua data.</li>
+  </ol>
+
+  <h3>6.6 Dispute Transaksi</h3>
+  <ol>
+    <li>Buka riwayat transaksi.</li>
+    <li>Pilih transaksi yang ingin dilaporkan.</li>
+    <li>Buka form dispute jika tersedia.</li>
+    <li>Tulis alasan dengan jelas dan kirim.</li>
+  </ol>
+
+  <h2>7. Kantin Merchant</h2>
+  <p>Fitur kantin hanya untuk akun role kantin pada perangkat yang sudah terdaftar dan aktif.</p>
+  <ol>
+    <li>Login sebagai petugas kantin.</li>
+    <li>Buka menu kantin/dompet merchant.</li>
+    <li>Masukkan nominal belanja.</li>
+    <li>Pindai QR/NFC kartu santri atau gunakan metode identifikasi yang tersedia.</li>
+    <li>Pastikan nama santri dan nominal sudah benar.</li>
+    <li>Proses pembayaran sesuai instruksi.</li>
+  </ol>
+  <p class="danger">Petugas kantin tidak boleh meminta, mencatat, atau menyimpan PIN santri di luar layar resmi aplikasi.</p>
+
+  <h2>8. Donasi, Infaq, Wakaf, dan Shadaqah</h2>
+  <p>Fitur donasi dapat digunakan oleh wali, alumni, atau pengguna umum sesuai akses aplikasi.</p>
+  <ol>
+    <li>Buka menu <strong>Donasi</strong>.</li>
+    <li>Pilih kategori: Infaq, Wakaf, atau Shadaqah.</li>
+    <li>Pilih nominal cepat atau masukkan nominal sendiri.</li>
+    <li>Isi nama donatur dan pesan jika diminta.</li>
+    <li>Pilih metode pembayaran.</li>
+    <li>Tekan <strong>Lanjutkan Donasi</strong>.</li>
+    <li>Ikuti instruksi pembayaran.</li>
+  </ol>
+  <p>Jika pembayaran berhasil, aplikasi menampilkan hasil sukses setelah status dikonfirmasi. Donatur yang login juga menerima notifikasi dengan pesan hangat: donasi/infaq telah diterima, semoga menjadi amal jariyah dan membawa keberkahan.</p>
+
+  <h2>9. Notifikasi</h2>
+  <p>Pusat notifikasi menampilkan kabar penting dari pesantren dan sistem aplikasi.</p>
+  <h3>9.1 Jenis Notifikasi</h3>
+  <ul>
+    <li>Tagihan dan pembayaran berhasil.</li>
+    <li>Donasi berhasil.</li>
+    <li>Prestasi santri.</li>
+    <li>Catatan kedisiplinan/pembinaan.</li>
+    <li>Perizinan santri: ditinjau, disetujui, ditolak, keluar, atau kembali.</li>
+    <li>Kesehatan santri.</li>
+    <li>Dompet Santri: saldo, transaksi, approval, keamanan, dispute.</li>
+    <li>Forum dan chat alumni.</li>
+    <li>Pengingat jadwal sholat jika diaktifkan.</li>
+  </ul>
+
+  <h3>9.2 Menggunakan Pusat Notifikasi</h3>
+  <ol>
+    <li>Buka ikon/menu <strong>Notifikasi</strong>.</li>
+    <li>Baca daftar notifikasi berdasarkan waktu terbaru.</li>
+    <li>Tekan kartu notifikasi untuk membuka halaman terkait.</li>
+    <li>Hapus notifikasi jika tidak diperlukan lagi.</li>
+  </ol>
+
+  <h3>9.3 Jika Notifikasi Tidak Muncul</h3>
+  <ul>
+    <li>Pastikan izin notifikasi Android aktif.</li>
+    <li>Pastikan akun masih login.</li>
+    <li>Pastikan koneksi internet tersedia.</li>
+    <li>Buka aplikasi agar token perangkat terdaftar ulang.</li>
+  </ul>
+
+  <h2>10. Tanya AI</h2>
+  <p>Tanya AI membantu pengguna bertanya tentang informasi pesantren, data yang diizinkan, dan pengetahuan umum yang tersedia di aplikasi.</p>
+  <ol>
+    <li>Buka menu <strong>Tanya AI</strong>.</li>
+    <li>Ketik pertanyaan pada kolom pesan.</li>
+    <li>Kirim pertanyaan dan tunggu jawaban.</li>
+    <li>Gunakan jawaban sebagai bantuan awal, bukan keputusan resmi.</li>
+  </ol>
+  <p class="warn">Jangan mengetik password, OTP, PIN, nomor kartu, atau rahasia pribadi ke Tanya AI.</p>
+
+  <h2>11. Berita dan Informasi Pesantren</h2>
+  <ol>
+    <li>Buka menu <strong>Berita</strong>.</li>
+    <li>Pilih berita dari daftar.</li>
+    <li>Baca detail berita resmi dari pesantren.</li>
+  </ol>
+
+  <h2>12. Al-Quran Digital</h2>
+  <p>Fitur Al-Quran digital menyediakan daftar surah, detail ayat, juz, terjemahan, bookmark, dan audio murottal.</p>
+  <h3>12.1 Membaca Surah atau Juz</h3>
+  <ol>
+    <li>Buka menu <strong>Al-Quran</strong>.</li>
+    <li>Pilih mode Surah atau Juz.</li>
+    <li>Pilih surah/juz yang ingin dibaca.</li>
+    <li>Gunakan bookmark untuk menyimpan bacaan penting jika tersedia.</li>
+  </ol>
+  <h3>12.2 Audio Full Surah dan Qori</h3>
+  <ol>
+    <li>Buka detail surah.</li>
+    <li>Pilih qori dari daftar yang tersedia.</li>
+    <li>Tekan tombol putar untuk memutar audio full surah.</li>
+    <li>Gunakan jeda/lanjutkan sesuai kebutuhan.</li>
+  </ol>
+  <p>Qori yang didukung mengikuti sumber audio Al-Quran yang tersedia, termasuk Abdullah Al-Juhany, Abdul Muhsin Al-Qasim, Abdurrahman As-Sudais, Ibrahim Al-Dossari, Misyari Rasyid Al-Afasi, dan Yasser Al-Dosari.</p>
+
+  <h2>13. Jadwal Sholat dan Pengingat</h2>
+  <ol>
+    <li>Buka menu <strong>Jadwal Sholat</strong>.</li>
+    <li>Pastikan lokasi atau kota sudah sesuai.</li>
+    <li>Lihat jadwal sholat harian.</li>
+    <li>Aktifkan pengingat yang diinginkan.</li>
+    <li>Pilih opsi notifikasi, getar, dering, atau adzan jika tersedia.</li>
+  </ol>
+  <p>Pengingat membutuhkan izin notifikasi dan pengaturan perangkat yang tidak membatasi alarm aplikasi.</p>
+
+  <h2>14. Cuaca</h2>
+  <ol>
+    <li>Buka menu <strong>Cuaca</strong>.</li>
+    <li>Lihat kondisi cuaca saat ini, suhu, kelembapan, angin, dan ringkasan prakiraan.</li>
+    <li>Gunakan informasi cuaca sebagai panduan aktivitas harian.</li>
+  </ol>
+  <p>Halaman cuaca mendukung tampilan light mode dan dark mode.</p>
+
+  <h2>15. Arah Kiblat</h2>
+  <ol>
+    <li>Buka menu <strong>Arah Kiblat</strong>.</li>
+    <li>Izinkan akses lokasi/sensor jika diminta.</li>
+    <li>Letakkan perangkat mendatar dan ikuti arah indikator kiblat.</li>
+  </ol>
+  <p>Untuk hasil terbaik, jauhi benda logam besar atau sumber magnet yang dapat mengganggu sensor kompas.</p>
+
+  <h2>16. Kalender Islam, Hadis, Kitab Kuning, dan Panduan Ibadah</h2>
+  <h3>16.1 Kalender Islam</h3>
+  <p>Gunakan menu Kalender Islam untuk melihat informasi tanggal Hijriah dan penanda hari penting sesuai data yang tersedia.</p>
+  <h3>16.2 Hadis</h3>
+  <ol>
+    <li>Buka menu <strong>Hadis</strong>.</li>
+    <li>Pilih kitab atau daftar hadis.</li>
+    <li>Buka detail hadis untuk membaca isi lengkap.</li>
+  </ol>
+  <h3>16.3 Kitab Kuning dan Panduan Ibadah</h3>
+  <p>Menu Kitab Kuning, Devotion, dan Panduan Ibadah menyediakan bahan bacaan dan panduan keislaman sesuai konten yang tersedia dalam aplikasi.</p>
+
+  <h2>17. Fitur Alumni</h2>
+  <p>Fitur alumni disediakan untuk membangun jejaring alumni pesantren dengan tetap menjaga keamanan dan moderasi.</p>
+
+  <h3>17.1 Registrasi dan Profil Alumni</h3>
+  <ol>
+    <li>Buka menu <strong>Alumni Register</strong> jika belum memiliki profil alumni.</li>
+    <li>Isi data yang diminta sesuai ketentuan.</li>
+    <li>Setelah terdaftar, buka <strong>Profil Alumni</strong> untuk melihat atau mengubah profil.</li>
+  </ol>
+
+  <h3>17.2 Direktori Alumni</h3>
+  <ol>
+    <li>Buka menu <strong>Direktori Alumni</strong>.</li>
+    <li>Cari alumni berdasarkan data yang tersedia.</li>
+    <li>Buka profil detail jika ingin melihat informasi lebih lanjut.</li>
+  </ol>
+
+  <h3>17.3 Forum Alumni</h3>
+  <ol>
+    <li>Buka menu <strong>Forum Alumni</strong>.</li>
+    <li>Baca thread yang tersedia.</li>
+    <li>Buat posting, komentar, atau reaction jika akun memiliki izin.</li>
+    <li>Laporkan konten yang tidak pantas melalui fitur laporan.</li>
+  </ol>
+
+  <h3>17.4 Chat Alumni Terenkripsi</h3>
+  <ol>
+    <li>Buka menu <strong>Chat Alumni</strong> atau buka chat dari profil alumni.</li>
+    <li>Pilih percakapan atau alumni tujuan.</li>
+    <li>Ketik pesan dan kirim.</li>
+  </ol>
+  <p>Chat alumni dirancang dengan enkripsi end-to-end. Server tidak menjadi sumber kebenaran isi pesan terbuka.</p>
+
+  <h2>18. Offline-First dan Koneksi</h2>
+  <p>Beberapa modul monitoring dapat menampilkan data terakhir dari cache lokal saat jaringan tidak stabil. Ini membantu aplikasi tetap berguna ketika koneksi lemah.</p>
+  <ul>
+    <li>Data monitoring seperti profil dan aktivitas tertentu dapat terbaca dari cache.</li>
+    <li>Data keuangan, pembayaran, top up, status transaksi, dan saldo tetap perlu koneksi online untuk validasi.</li>
+    <li>Jika data tampak belum terbaru, buka ulang halaman saat koneksi stabil.</li>
+  </ul>
+
+  <h2>19. Keamanan Pengguna</h2>
+  <ul>
+    <li>Jangan membagikan email, password, OTP, PIN, atau kode pembayaran kepada siapa pun.</li>
+    <li>Pastikan nama santri, nominal, dan metode pembayaran benar sebelum membayar.</li>
+    <li>Jangan menyebarkan data kesehatan, tagihan, atau riwayat santri tanpa izin.</li>
+    <li>Jika perangkat hilang, segera hubungi pengurus agar perangkat/token bisa diamankan.</li>
+    <li>Gunakan hanya aplikasi dari sumber resmi pesantren.</li>
+  </ul>
+
+  <h2>20. Troubleshooting</h2>
+  <table>
+    <tr><th>Masalah</th><th>Kemungkinan Penyebab</th><th>Langkah Pengguna</th></tr>
+    <tr><td>Tidak bisa login</td><td>Email/kata sandi salah, akun belum aktif, koneksi bermasalah.</td><td>Periksa email dan kata sandi, coba koneksi lain, hubungi pengurus jika akun belum aktif.</td></tr>
+    <tr><td>Data santri tidak muncul</td><td>Akun belum terhubung ke santri, data belum tersedia, atau jaringan lambat.</td><td>Buka ulang halaman, pastikan login benar, hubungi pengurus untuk pengecekan relasi wali-santri.</td></tr>
+    <tr><td>Status pembayaran belum berubah</td><td>Konfirmasi Midtrans/server belum masuk atau koneksi lambat.</td><td>Tunggu beberapa saat, gunakan cek status, jangan membayar ulang sebelum status jelas.</td></tr>
+    <tr><td>Notifikasi tidak muncul</td><td>Izin notifikasi mati, token perangkat belum terdaftar, akun logout.</td><td>Aktifkan izin notifikasi, buka aplikasi saat online, login ulang jika perlu.</td></tr>
+    <tr><td>Audio Al-Quran tidak berjalan</td><td>Koneksi internet lambat, sumber audio belum termuat, atau qori belum dipilih.</td><td>Pilih qori, coba putar ulang, gunakan koneksi yang lebih stabil.</td></tr>
+    <tr><td>Jadwal sholat tidak mengingatkan</td><td>Izin notifikasi/alarm dibatasi perangkat.</td><td>Aktifkan izin notifikasi dan periksa pengaturan baterai/alarm perangkat.</td></tr>
+    <tr><td>Dompet/top up belum masuk</td><td>Status pembayaran belum dikonfirmasi server.</td><td>Tunggu konfirmasi, cek status, hubungi pengurus jika sudah lama dan bukti pembayaran tersedia.</td></tr>
+  </table>
+
+  <h2>21. Batasan Penting</h2>
+  <ul>
+    <li>Aplikasi Android bukan Admin Panel.</li>
+    <li>Wali tidak mengubah data pokok santri, tagihan, hafalan, pelanggaran, kesehatan, perizinan, atau prestasi.</li>
+    <li>Pengajuan koreksi data dilakukan melalui pengurus pesantren.</li>
+    <li>Keputusan administratif tetap mengikuti kebijakan resmi pesantren.</li>
+    <li>Donasi tanpa login tidak memiliki tujuan notifikasi akun personal; status tetap bisa tampil di layar pembayaran jika order dapat dilacak.</li>
+  </ul>
+
+  <h2>22. Ringkasan Fitur</h2>
+  <table>
+    <tr><th>Fitur</th><th>Wali</th><th>Alumni</th><th>Kantin</th><th>Umum</th></tr>
+    <tr><td>Profil dan aktivitas santri</td><td>Ya</td><td>Tidak</td><td>Tidak</td><td>Tidak</td></tr>
+    <tr><td>Tagihan dan pembayaran SPP</td><td>Ya</td><td>Tidak</td><td>Tidak</td><td>Tidak</td></tr>
+    <tr><td>Dompet Santri wali</td><td>Ya</td><td>Tidak</td><td>Tidak</td><td>Tidak</td></tr>
+    <tr><td>Kantin merchant</td><td>Tidak</td><td>Tidak</td><td>Ya</td><td>Tidak</td></tr>
+    <tr><td>Donasi</td><td>Ya</td><td>Ya</td><td>Sesuai akun</td><td>Ya</td></tr>
+    <tr><td>Alumni forum/chat/direktori</td><td>Sesuai akun</td><td>Ya</td><td>Tidak</td><td>Terbatas</td></tr>
+    <tr><td>Al-Quran, jadwal sholat, cuaca, kiblat</td><td>Ya</td><td>Ya</td><td>Ya</td><td>Ya</td></tr>
+    <tr><td>Tanya AI</td><td>Ya</td><td>Ya</td><td>Ya</td><td>Terbatas</td></tr>
+    <tr><td>Notifikasi personal</td><td>Ya</td><td>Ya</td><td>Ya</td><td>Perlu login</td></tr>
+  </table>
+
+  <h2>23. Bantuan</h2>
+  <p>Jika mengalami kendala yang tidak dapat diselesaikan dari panduan ini, hubungi pengurus pesantren atau tim IT resmi. Sertakan informasi berikut agar pemeriksaan lebih cepat:</p>
+  <ul>
+    <li>Nama akun/email yang digunakan.</li>
+    <li>Nama santri atau NIS jika terkait data santri.</li>
+    <li>Nama menu yang bermasalah.</li>
+    <li>Waktu kejadian.</li>
+    <li>Screenshot jika aman untuk dibagikan dan tidak memuat rahasia seperti PIN/OTP.</li>
+  </ul>
+
+  <p class="small">Dokumen ini disusun untuk rilis awal produksi aplikasi Android Al-Hasanah Media. Isi dokumen dapat diperbarui mengikuti perubahan fitur aplikasi dan kebijakan pesantren.</p>
+</body>
+</html>

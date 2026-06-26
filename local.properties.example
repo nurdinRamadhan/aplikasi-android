@@ -1,0 +1,12 @@
+## Copy to local.properties on each developer machine.
+## Do not commit local.properties.
+
+sdk.dir=/path/to/android/sdk
+
+release.keystore=/path/to/release-keystore.jks
+release.keystore.password=change-me
+release.key.alias=change-me
+release.key.password=change-me
+
+supabase.url=https://your-project.supabase.co
+supabase.anon.key=your-supabase-anon-or-publishable-key

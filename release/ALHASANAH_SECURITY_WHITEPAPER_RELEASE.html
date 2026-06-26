@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Security Whitepaper & Cryptographic Protocol - Al-Hasanah Media Android</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; line-height: 1.48; color: #111827; }
+    h1 { font-size: 24pt; margin-bottom: 6pt; }
+    h2 { font-size: 16pt; margin-top: 20pt; border-bottom: 1px solid #d1d5db; padding-bottom: 4pt; }
+    h3 { font-size: 12.5pt; margin-top: 14pt; }
+    p { margin: 6pt 0; }
+    ul, ol { margin-top: 4pt; }
+    li { margin: 3pt 0; }
+    table { border-collapse: collapse; width: 100%; margin: 8pt 0; }
+    th, td { border: 1px solid #d1d5db; padding: 6pt; vertical-align: top; }
+    th { background: #f3f4f6; }
+    code { font-family: Consolas, monospace; font-size: 9.5pt; }
+    .meta { color: #374151; }
+    .note { background: #f9fafb; border-left: 4px solid #2563eb; padding: 8pt; }
+    .risk { background: #fff7ed; border-left: 4px solid #ea580c; padding: 8pt; }
+  </style>
+</head>
+<body>
+  <h1>SECURITY WHITEPAPER & CRYPTOGRAPHIC PROTOCOL</h1>
+  <p class="meta"><strong>Produk:</strong> Al-Hasanah Media Android dan Supabase Backend</p>
+  <p class="meta"><strong>Versi dokumen:</strong> 2.0 Production Alignment</p>
+  <p class="meta"><strong>Tanggal:</strong> 23 Mei 2026</p>
+  <p class="meta"><strong>Lingkup:</strong> aplikasi Android wali santri, alumni, donasi/infaq, pembayaran, dompet santri, notifikasi, chat alumni, database Supabase, Edge Functions, cron, dan audit operasional.</p>
+
+  <div class="note">
+    <p><strong>Pernyataan akurasi:</strong> dokumen ini menggantikan narasi lama yang terlalu sempit pada "Tabungan Santri" dan terlalu absolut pada istilah "zero trust". Sistem ini menggunakan pendekatan defense-in-depth, least privilege, RLS-first, cryptographic control, auditability, dan fail-safe operation. Dokumen ini hanya menyatakan kontrol yang ditemukan dalam implementasi Android, migrasi database, Edge Functions, dan konfigurasi rilis saat ini.</p>
+  </div>
+
+  <h2>1. Ringkasan Eksekutif</h2>
+  <p>Al-Hasanah Media adalah aplikasi Android monitoring wali santri dengan backend Supabase. Aplikasi ini menggabungkan data santri, aktivitas akademik dan kepesantrenan, pembayaran SPP, donasi/infaq, dompet santri, jadwal ibadah, Al-Qur'an digital, forum dan chat alumni, tanya AI, cuaca, notifikasi, serta fitur offline-first untuk modul non-keuangan.</p>
+  <p>Keamanan sistem dibangun dalam beberapa lapisan:</p>
+  <ul>
+    <li><strong>Identitas dan sesi:</strong> Supabase Auth, JWT session, pemetaan role pada <code>profiles</code>, serta pembatasan akses berdasarkan <code>auth.uid()</code>.</li>
+    <li><strong>Database access control:</strong> Row Level Security aktif pada hampir seluruh tabel aplikasi publik dan seluruh tabel operasional <code>ops</code>.</li>
+    <li><strong>Fungsi backend terkontrol:</strong> operasi sensitif dijalankan melalui RPC/Edge Functions dengan <code>SECURITY DEFINER</code>, role check, revocation grants, dan service-role boundary.</li>
+    <li><strong>Kriptografi Android:</strong> AndroidKeyStore, AES-GCM, Ed25519, Argon2id, ECDH, ECDSA, PBKDF2, HMAC-SHA256, dan SHA-256 sesuai kebutuhan modul.</li>
+    <li><strong>Keuangan online-first:</strong> pembayaran, dompet santri, top up, settlement, dan transaksi kantin tetap online agar ledger, status, risk rule, dan audit selalu berasal dari backend.</li>
+    <li><strong>Offline-first terkendali:</strong> modul non-keuangan memakai cache lokal dengan TTL dan enkripsi untuk data yang sensitif.</li>
+    <li><strong>Notifikasi aman:</strong> FCM token diikat ke user login, invalid token dapat dinonaktifkan, payload chat disanitasi, dan antrean notifikasi diarsipkan otomatis.</li>
+    <li><strong>Audit dan operasional:</strong> audit log, finance immutable audit trail, wallet audit, reconciliation, hash-chain verification, incident playbook, backend health snapshot, dan cron maintenance.</li>
+  </ul>
+
+  <h2>2. Prinsip Keamanan</h2>
+  <h3>2.1 Defense-in-Depth</h3>
+  <p>Tidak ada satu kontrol tunggal yang dianggap cukup. Android, Edge Function, database, RLS, cron, audit log, dan notification worker saling menutup kelemahan satu sama lain.</p>
+
+  <h3>2.2 Least Privilege</h3>
+  <p>Client Android menggunakan publishable/anon key dan session user. Service role hanya digunakan pada lingkungan backend/Edge Function untuk operasi yang memang harus melewati RLS, misalnya webhook Midtrans, push notification worker, settlement service, reconciliation, dan audit otomatis.</p>
+
+  <h3>2.3 RLS-First</h3>
+  <p>Data aplikasi tidak dianggap aman hanya karena UI tidak menampilkan menu tertentu. Tabel seperti <code>santri</code>, <code>tagihan_santri</code>, <code>transaksi_keuangan</code>, <code>notification_queue</code>, <code>chat_messages</code>, <code>dompet_santri</code>, <code>transaksi_dompet</code>, dan tabel wallet lain dikunci dengan Row Level Security.</p>
+
+  <h3>2.4 Online Authority untuk Keuangan</h3>
+  <p>Modul finansial sengaja tidak dibuat offline-first penuh. Tagihan SPP, pembayaran, donasi/infaq, dompet santri, top up, kantin, settlement, dan status pembayaran harus tetap diverifikasi oleh backend agar tidak terjadi double spend, saldo lokal palsu, atau status pembayaran yang tidak sinkron.</p>
+
+  <h3>2.5 No Plaintext untuk Chat E2EE</h3>
+  <p>Chat alumni memakai placeholder server seperti "Pesan terenkripsi". Isi pesan terenkripsi disimpan per perangkat penerima, sehingga database tidak menyimpan isi percakapan dalam plaintext untuk skema baru <code>e2ee_v1</code>.</p>
+
+  <h2>3. Arsitektur Sistem</h2>
+  <table>
+    <tr><th>Lapisan</th><th>Komponen</th><th>Kontrol Keamanan</th></tr>
+    <tr><td>Android</td><td>Jetpack Compose, Supabase Kotlin client, Room, DataStore, FCM, AndroidKeyStore</td><td>Private app storage, AES-GCM cache, TLS-only, certificate pinning, root/emulator guard untuk transaksi wallet release, E2EE chat, PIN verifier generation, Ed25519 signing.</td></tr>
+    <tr><td>Network</td><td>Supabase API, Edge Functions, Midtrans API</td><td><code>cleartextTrafficPermitted=false</code>, certificate pin-set untuk Supabase dan Midtrans, server key Midtrans hanya di Edge Function.</td></tr>
+    <tr><td>Supabase Auth</td><td>JWT, <code>auth.uid()</code>, authenticated role</td><td>RLS policy, user-bound RPC, FCM device registration berdasarkan user aktif.</td></tr>
+    <tr><td>Database</td><td>Postgres, public schema, ops schema, app_private schema</td><td>RLS, private helper functions, service-role-only routines, audit log, retention archive, immutable finance audit.</td></tr>
+    <tr><td>Edge Functions</td><td>Midtrans, wallet, push, RAG, security auditor</td><td>Secret isolation, Authorization validation, backend-only mutations, idempotency, webhook signature verification.</td></tr>
+    <tr><td>Cron/Operations</td><td>pg_cron, pg_net, scheduled jobs</td><td>Reconciliation, hash-chain check, notification push worker, retention archive, backend health snapshot, maintenance digest.</td></tr>
+  </table>
+
+  <h2>4. Identitas, Role, dan Session Boundary</h2>
+  <p>Identitas utama memakai Supabase Auth. Database memakai <code>auth.uid()</code> untuk menghubungkan user dengan profil, wali santri, alumni, admin, bendahara, dewan, rois, kantin, dan service process.</p>
+  <p>Role aplikasi disimpan pada <code>public.profiles.role</code>. Fungsi helper seperti <code>is_admin_in_roles</code>, access scope, dan fungsi privat pada <code>app_private</code> digunakan untuk memisahkan hak baca/tulis antar role.</p>
+  <p>Untuk wali santri, pola akses utama adalah relasi <code>santri.wali_id = auth.uid()</code>. Ini memastikan wali hanya melihat data anak yang terhubung dengan akunnya. Untuk alumni, akses forum/chat bergantung pada status alumni aktif dan partisipasi percakapan.</p>
+
+  <h2>5. Database Security dan RLS</h2>
+  <h3>5.1 Status RLS</h3>
+  <p>Audit database saat dokumen ini dibuat menunjukkan RLS aktif pada tabel aplikasi utama, termasuk <code>profiles</code>, <code>santri</code>, <code>tagihan_santri</code>, <code>transaksi_keuangan</code>, <code>notification_queue</code>, <code>rag_documents</code>, <code>forum_threads</code>, <code>chat_*</code>, <code>dompet_santri</code>, <code>wallet_*</code>, dan tabel <code>ops</code>.</p>
+  <p>Skema <code>ops</code> dipakai untuk data operasional internal seperti <code>finance_audit_events</code>, <code>notification_archive</code>, <code>backend_health_snapshots</code>, <code>incident_playbooks</code>, dan <code>midtrans_reconciliation_queue</code>. Banyak tabel <code>ops</code> sengaja RLS enabled tanpa policy publik agar tidak bisa dibaca oleh client biasa.</p>
+
+  <h3>5.2 Grant Tightening</h3>
+  <p>Migrasi produksi telah melakukan tightening pada grant sensitif, termasuk pencabutan akses langsung pada beberapa tabel dan fungsi dari <code>anon</code>/<code>authenticated</code>, lalu menggantinya dengan RPC yang memvalidasi user, role, dan relasi bisnis. Operasi seperti settlement merchant, wallet system freeze, wallet reconciliation, wallet security audit, dan fungsi internal lain diberikan ke <code>service_role</code>.</p>
+
+  <h3>5.3 SECURITY DEFINER</h3>
+  <p><code>SECURITY DEFINER</code> digunakan untuk kasus yang memerlukan akses terkontrol melampaui RLS biasa. Implementasi yang baik pada sistem ini mencakup:</p>
+  <ul>
+    <li><code>set search_path</code> eksplisit untuk mengurangi risiko function hijacking.</li>
+    <li>Role check di dalam fungsi.</li>
+    <li>Revocation dari <code>public</code>, <code>anon</code>, dan/atau <code>authenticated</code> bila fungsi hanya boleh dipanggil service.</li>
+    <li>Audit log ketika fungsi sensitif dijalankan.</li>
+  </ul>
+
+  <h2>6. Android Security</h2>
+  <h3>6.1 AndroidKeyStore</h3>
+  <p>Aplikasi memakai AndroidKeyStore sebagai root of trust lokal untuk beberapa kunci AES-GCM:</p>
+  <ul>
+    <li><code>alhasanah_santri_detail_cache_v1</code> untuk enkripsi cache detail santri.</li>
+    <li><code>alhasanah_alumni_chat_cache_v1</code> untuk enkripsi cache alumni/chat.</li>
+    <li><code>alhasanah_chat_outbox_v1</code> untuk outbox chat lokal.</li>
+    <li><code>wallet-device-wrap-key</code> untuk membungkus private key wallet yang disimpan lokal.</li>
+    <li>Alias per user/per device untuk membungkus private key chat E2EE.</li>
+  </ul>
+
+  <h3>6.2 Network Security Config</h3>
+  <p>Aplikasi menonaktifkan cleartext traffic secara global dengan <code>cleartextTrafficPermitted=false</code>. Domain Supabase dan Midtrans memiliki certificate pin-set sampai 31 Desember 2027. Pinning yang terpasang:</p>
+  <ul>
+    <li><code>sldobkbolvrahlnowrga.supabase.co</code></li>
+    <li><code>api.sandbox.midtrans.com</code></li>
+    <li><code>api.midtrans.com</code></li>
+  </ul>
+  <p>Konsekuensi operasional: sebelum sertifikat/chain provider berubah atau mendekati kedaluwarsa, pin harus diuji dan diperbarui agar aplikasi release tidak gagal koneksi.</p>
+
+  <h3>6.3 Root dan Emulator Guard</h3>
+  <p>Pada build release, operasi dompet sensitif menjalankan guard terhadap indikasi root dan emulator. Guard ini memblokir transaksi bila ditemukan path <code>su</code>, aplikasi superuser/Magisk tertentu, <code>test-keys</code>, atau fingerprint/model emulator. Pada build debug guard dilewati agar pengembangan tetap praktis.</p>
+
+  <h2>7. Offline-First dan Local Data Protection</h2>
+  <p>Offline-first digunakan untuk pengalaman baca yang cepat dan tetap berguna saat jaringan lemah. Modul seperti data santri, aktivitas santri, jadwal sholat, kalender Islam, hadis, panduan ibadah, kitab, alumni, forum, dan chat memiliki cache lokal dengan TTL.</p>
+  <p>TTL yang ditemukan antara lain:</p>
+  <ul>
+    <li>Lokasi jadwal sholat: 30 hari.</li>
+    <li>Jadwal sholat harian: 48 jam.</li>
+    <li>Jadwal sholat bulanan: 40 hari.</li>
+    <li>Hadis daftar: 90 hari; detail hadis: 180 hari.</li>
+    <li>Panduan ibadah: 90-180 hari.</li>
+    <li>Kalender Islam: 36 jam; hari libur: 30 hari.</li>
+    <li>Cache alumni: akses 15 menit, direktori 5 menit, forum 45 menit, chat 24 jam.</li>
+  </ul>
+  <p>Data lokal sensitif dienkripsi dengan AES/GCM/NoPadding dan kunci dari AndroidKeyStore. Modul keuangan tidak mengandalkan cache offline sebagai sumber kebenaran.</p>
+
+  <h2>8. Cryptographic Protocol: Alumni Chat E2EE</h2>
+  <h3>8.1 Key Establishment</h3>
+  <p>Setiap perangkat chat memiliki key pair EC pada kurva <code>secp256r1</code>. Public key perangkat disinkronkan ke backend, sedangkan private key disimpan lokal setelah dibungkus dengan AES-GCM dari AndroidKeyStore.</p>
+  <p>Untuk mengenkripsi pesan ke perangkat penerima, aplikasi melakukan ECDH antara private key pengirim dan public key perangkat penerima. Shared secret kemudian di-hash SHA-256 untuk membentuk AES key.</p>
+
+  <h3>8.2 Message Encryption</h3>
+  <p>Isi pesan dienkripsi memakai <code>AES/GCM/NoPadding</code> dengan nonce 12 byte dan tag 128 bit. AAD berisi kombinasi user/perangkat penerima dan perangkat pengirim, sehingga ciphertext terikat pada konteks percakapan perangkat.</p>
+  <p>Server menyimpan metadata pesan, placeholder, dan ciphertext per device pada <code>chat_message_device_ciphertexts</code>. Isi plaintext tidak disimpan sebagai <code>chat_messages.content</code> untuk skema <code>e2ee_v1</code>.</p>
+
+  <h3>8.3 Plaintext Redaction</h3>
+  <p>Migrasi <code>harden_alumni_chat_e2ee</code>, <code>drop_chat_message_plaintext_content</code>, dan <code>enforce_chat_zero_plaintext_surfaces</code> mengubah pesan lama menjadi placeholder, memaksa <code>content = 'Pesan terenkripsi'</code>, dan menyamarkan preview notifikasi. Admin monitor hanya melihat statistik dan preview terenkripsi, bukan isi pesan.</p>
+
+  <h3>8.4 Key Backup</h3>
+  <p>Backup private key chat memakai <code>PBKDF2WithHmacSHA256</code> dengan 210.000 iterasi, salt 16 byte, AES-GCM, dan verifikasi pasangan kunci melalui tanda tangan <code>SHA256withECDSA</code> sebelum restore diterima.</p>
+
+  <h2>9. Cryptographic Protocol: Dompet Santri</h2>
+  <h3>9.1 Device Signature</h3>
+  <p>Wallet device crypto memakai key pair <code>Ed25519</code>. Private key disimpan lokal dalam SharedPreferences setelah dienkripsi AES-GCM dengan key dari AndroidKeyStore. Public key dikirim ke backend untuk registrasi perangkat.</p>
+  <p>Operasi seperti kantin authorization dan card lookup menandatangani canonical message yang berisi versi protokol, wallet public id, nominal, kantin user id, Android device id, idempotency key, media, merchant/outlet id, dan nonce.</p>
+
+  <h3>9.2 PIN Santri</h3>
+  <p>PIN tidak disimpan plaintext. Aplikasi membuat verifier dengan Argon2id:</p>
+  <ul>
+    <li>Salt: 16 byte random.</li>
+    <li>Memory default: 19.456 KiB.</li>
+    <li>Iterations: 3.</li>
+    <li>Parallelism: 1.</li>
+    <li>Output: 32 byte.</li>
+  </ul>
+  <p>Database memiliki constraint yang mencegah verifier menyerupai PIN numeric plaintext. RPC <code>wallet_set_student_pin_verifier</code> memastikan actor adalah wali dari santri terkait sebelum menyimpan salt, verifier, KDF parameter, dan versi PIN.</p>
+
+  <h3>9.3 PIN Proof</h3>
+  <p>Untuk pembuktian PIN, aplikasi menurunkan verifier Argon2id dari input PIN, lalu membuat HMAC-SHA256 atas message tantangan. Material verifier di memori dihapus setelah dipakai.</p>
+
+  <h3>9.4 QR/NFC Opaque Identifier</h3>
+  <p>Kontrol wallet menyatakan <code>qr_payload_policy = opaque_public_id_only</code>. QR/NFC tidak boleh memuat saldo atau data sensitif. Payload hanya menjadi pointer publik yang harus diverifikasi ulang oleh backend.</p>
+
+  <h2>10. Wallet Banking-Grade Controls</h2>
+  <h3>10.1 System Freeze</h3>
+  <p>Tabel <code>wallet_system_controls</code> memiliki freeze switch untuk <code>wallet_transactions</code>. Bila rekonsiliasi internal gagal atau operator/service mendeteksi risiko kritis, transaksi dapat dibekukan secara sistemik.</p>
+
+  <h3>10.2 Risk Rules</h3>
+  <p>Risk detection wallet mencakup:</p>
+  <ul>
+    <li>Jam operasional transaksi Asia/Jakarta, default 06:00-21:00.</li>
+    <li>Velocity santri 5 menit.</li>
+    <li>Velocity kantin 10 menit.</li>
+    <li>Nominal di atas baseline rata-rata harian.</li>
+    <li>Perangkat kantin belum aktif.</li>
+    <li>Public key perangkat kantin tidak cocok.</li>
+  </ul>
+  <p>Action risk meliputi <code>flag</code>, <code>require_parent_approval</code>, <code>block</code>, <code>freeze_wallet</code>, dan <code>freeze_system</code>.</p>
+
+  <h3>10.3 Idempotency dan Expiry</h3>
+  <p>Authorization session wallet memakai idempotency key kuat, challenge, nonce, dan expiry sekitar 5 menit. Repeated request dengan idempotency key yang sama diperlakukan sebagai replay sah dan mengembalikan session yang sama, bukan membuat transaksi baru.</p>
+
+  <h3>10.4 Ledger, Hash-Chain, dan Reconciliation</h3>
+  <p><code>transaksi_dompet</code> menjadi ledger utama. Sistem memiliki <code>wallet_reconciliation_runs</code> untuk membandingkan net ledger dengan saldo cache aktif, serta <code>wallet_ledger_integrity_runs</code> untuk verifikasi hash-chain. Jika ledger net dan saldo cache tidak cocok, sistem dapat memicu freeze otomatis.</p>
+
+  <h3>10.5 Merchant dan Settlement</h3>
+  <p>Ekosistem kantin memakai <code>wallet_merchants</code>, <code>wallet_merchant_outlets</code>, <code>wallet_merchant_users</code>, <code>wallet_merchant_balances</code>, <code>wallet_merchant_ledger</code>, dan <code>wallet_merchant_settlement_requests</code>. Settlement service dikunci agar operasi payout tidak dijalankan langsung oleh client biasa.</p>
+
+  <h3>10.6 Dispute</h3>
+  <p><code>wallet_disputes</code> memungkinkan wali atau admin membuka sengketa atas transaksi ledger. RLS membatasi wali hanya melihat dispute milik santri yang terhubung dengannya, sementara admin role terkait dapat melakukan review.</p>
+
+  <h2>11. Payment Security: SPP, Donasi/Infaq, dan Top Up</h2>
+  <h3>11.1 Midtrans Server Key Isolation</h3>
+  <p>Midtrans server key tidak berada di aplikasi Android. Pembuatan charge/Snap dilakukan melalui Edge Functions seperti <code>midtrans-core-charge</code>, <code>midtrans-snap</code>, dan <code>wallet-topup-create</code>. Android hanya mengirim permintaan ke backend dan menerima instruksi pembayaran yang telah dinormalisasi.</p>
+
+  <h3>11.2 Webhook Signature Verification</h3>
+  <p>Webhook <code>midtrans-payment</code> memverifikasi <code>signature_key</code> menggunakan SHA-512 atas kombinasi <code>order_id</code>, <code>status_code</code>, <code>gross_amount</code>, dan server key. Jika signature tidak cocok, webhook ditolak.</p>
+
+  <h3>11.3 Status Normalization</h3>
+  <p>Status transaksi dari Midtrans dinormalisasi ke status aplikasi. Pembayaran sukses memperbarui <code>transaksi_keuangan</code>, <code>tagihan_santri</code>, atau <code>wallet_payment_intents</code> sesuai jenis order. Untuk top up wallet, webhook memposting ledger credit melalui RPC backend.</p>
+
+  <h3>11.4 Public Payment Status</h3>
+  <p><code>get_payment_status_public</code> tersedia untuk mengecek status berdasarkan order id. Fungsi ini harus tetap mengembalikan data minimal dan tidak boleh membocorkan data wali/santri di luar konteks pembayaran.</p>
+
+  <h2>12. Notifikasi dan FCM Security</h2>
+  <h3>12.1 Token Binding</h3>
+  <p>FCM token didaftarkan melalui RPC <code>register_my_fcm_device</code> yang memakai user login aktif. Desain ini mencegah token lintas akun menyebabkan notifikasi nyasar. Token dapat dinonaktifkan melalui <code>deactivate_my_fcm_device</code>.</p>
+
+  <h3>12.2 Push Worker</h3>
+  <p>Notification worker berjalan melalui Edge Function <code>push-notifications</code>. Cron memanggil function tanpa JWT legacy; function memakai secret service role internal. Worker memproses antrean bertahap, mengirim FCM, dan memperbarui status.</p>
+
+  <h3>12.3 Sanitasi Payload</h3>
+  <p>Notifikasi chat tidak membawa plaintext pesan. Body memakai teks seperti "Pesan terenkripsi baru". Notifikasi aktivitas santri, prestasi, perizinan, kesehatan, pelanggaran, tagihan, donasi, dan dompet memakai bahasa ramah untuk wali santri dan menyertakan metadata navigasi secukupnya.</p>
+
+  <h3>12.4 Retention dan Archive</h3>
+  <p>Antrean aktif <code>notification_queue</code> dibersihkan otomatis oleh <code>ops.archive_and_prune_notifications</code>. Kebijakan default:</p>
+  <ul>
+    <li>Notifikasi sent/read non-kritis diarsipkan setelah 30 hari.</li>
+    <li>Notifikasi failed non-kritis diarsipkan setelah 14 hari.</li>
+    <li>Notifikasi kritis diarsipkan setelah 90 hari jika sudah reviewed/resolved/ignored.</li>
+  </ul>
+  <p>Data dipindahkan dulu ke <code>ops.notification_archive</code>, baru dihapus dari antrean publik. Job berjalan harian pukul 02:00 WIB.</p>
+
+  <h2>13. Finance Audit Trail</h2>
+  <p>Sistem memiliki immutable audit trail pada <code>ops.finance_audit_events</code>. Trigger mencatat perubahan penting pada <code>transaksi_keuangan</code> dan <code>tagihan_santri</code>, termasuk nominal, status, metode pembayaran, order id Midtrans, waktu sukses, admin pencatat, sisa tagihan, tanggal jatuh tempo, dan deskripsi tagihan.</p>
+  <p>Audit ini tidak mengubah workflow bisnis; ia hanya menambah jejak forensik agar perubahan finansial dapat ditelusuri.</p>
+
+  <h2>14. AI/RAG Security</h2>
+  <p>Fitur Tanya AI menggunakan dokumen RAG dan log query yang berada pada tabel RLS-enabled seperti <code>rag_documents</code>, <code>rag_document_chunks</code>, <code>rag_query_logs</code>, dan <code>rag_rate_limits</code>. Akses harus tetap mengikuti role dan konteks user. Rate limit dipakai untuk mengurangi penyalahgunaan.</p>
+  <p>Untuk audit/security AI wallet, sistem menyimpan hasil analisis pada <code>wallet_security_ai_analyses</code> dan audit deterministic pada <code>wallet_security_audit_runs</code>. Data yang dikirim ke analisis harus bersifat sanitized dan tidak membawa rahasia pembayaran atau PIN.</p>
+
+  <h2>15. Operational Security</h2>
+  <h3>15.1 Cron dan Maintenance</h3>
+  <p>Sistem memiliki job otomatis untuk push notification, reconciliation, ledger integrity, dispute SLA, weekly digest, backend health snapshot, maintenance digest, dan retention notifikasi. Job ini membantu mendeteksi kondisi rusak sebelum terlihat oleh user.</p>
+
+  <h3>15.2 Incident dan Self-Healing</h3>
+  <p>Skema <code>ops</code> menyimpan <code>incident_playbooks</code>, <code>incidents</code>, <code>incident_events</code>, <code>backend_alerts</code>, dan <code>backend_health_snapshots</code>. Data ini menjadi basis control tower untuk memantau masalah operasional seperti cron gagal, token FCM bermasalah, anomali Midtrans, dan kondisi backend lain.</p>
+
+  <h3>15.3 Security Audit Center</h3>
+  <p><code>wallet_run_security_audit</code> melakukan pemeriksaan deterministic atas freeze switch, parent approval threshold, rekonsiliasi, hash-chain, risk event, dispute, notifikasi kritis, merchant assignment, saldo merchant, settlement, PIN, RLS, anon grants, QR opaque, Argon2id, dan cron. Hasilnya disimpan di <code>wallet_security_audit_runs</code>.</p>
+
+  <h2>16. Data Classification</h2>
+  <table>
+    <tr><th>Kelas Data</th><th>Contoh</th><th>Kontrol</th></tr>
+    <tr><td>Publik terkontrol</td><td>Berita, struktur organisasi tertentu, prestasi publik</td><td>RLS/policy publik terbatas, sanitasi field.</td></tr>
+    <tr><td>Data wali/santri</td><td>Profil santri, hafalan, pelanggaran, kesehatan, perizinan, nilai</td><td>RLS relasi wali-santri, cache TTL, enkripsi cache detail sensitif.</td></tr>
+    <tr><td>Finansial</td><td>Tagihan, transaksi SPP, donasi, wallet, ledger, settlement</td><td>Online authority, Edge Functions, webhook signature, audit trail, RLS, reconciliation.</td></tr>
+    <tr><td>Rahasia lokal</td><td>Private key chat, private key wallet, cache outbox</td><td>AndroidKeyStore, AES-GCM, private app storage.</td></tr>
+    <tr><td>Operasional internal</td><td>Incident, backend alert, token health, notification archive</td><td>Skema <code>ops</code>, RLS enabled, no public policies, service/internal access.</td></tr>
+    <tr><td>Rahasia provider</td><td>Midtrans server key, Supabase service role key</td><td>Edge Function secrets, tidak ditanam di APK.</td></tr>
+  </table>
+
+  <h2>17. Known Advisories dan Residual Risk</h2>
+  <div class="risk">
+    <p><strong>Catatan penting:</strong> Supabase security advisor masih mendeteksi beberapa hal yang perlu dicatat sebagai residual risk atau pekerjaan hardening lanjutan. Dokumen ini tidak menyembunyikan temuan tersebut.</p>
+  </div>
+  <ul>
+    <li><code>public.spatial_ref_sys</code> masih RLS disabled. Tabel ini berasal dari PostGIS dan sering bersifat referensi geospasial, tetapi karena berada di schema publik exposed, advisor menandainya critical. Remediasi perlu hati-hati agar tidak merusak fitur geospasial.</li>
+    <li>Extension <code>postgis</code> berada di schema <code>public</code>. Advisor menyarankan memindahkan extension ke schema khusus.</li>
+    <li>Beberapa fungsi <code>SECURITY DEFINER</code> masih callable oleh <code>anon</code> atau <code>authenticated</code>. Sebagian memang disengaja sebagai public/signed-in RPC dengan validasi internal, namun daftar ini perlu review berkala.</li>
+    <li>Leaked password protection Supabase Auth masih terdeteksi disabled. Untuk produksi penuh, fitur ini sebaiknya diaktifkan jika kompatibel dengan kebijakan login.</li>
+    <li>Certificate pinning membutuhkan rotasi sebelum 31 Desember 2027 atau ketika provider mengganti certificate chain.</li>
+    <li>Device id berbasis Android ID cukup untuk binding operasional saat ini, tetapi bukan identitas hardware absolut. Keamanan utama tetap harus berasal dari user session, FCM token binding, public key device, signature, RLS, dan backend validation.</li>
+    <li>Jika user membagikan password, PIN, atau perangkat tidak terkunci, kontrol aplikasi tidak dapat sepenuhnya mencegah penyalahgunaan.</li>
+    <li>Push notification bukan sumber kebenaran. Aplikasi harus tetap refetch data dari backend ketika user membuka halaman terkait.</li>
+  </ul>
+
+  <h2>18. Incident Response</h2>
+  <p>Ketika terjadi indikasi insiden, prosedur yang tersedia secara sistemik adalah:</p>
+  <ol>
+    <li>Bekukan transaksi wallet melalui freeze switch jika ada mismatch ledger, kecurigaan double spend, atau anomali kritis.</li>
+    <li>Jalankan wallet reconciliation dan ledger integrity check.</li>
+    <li>Review <code>wallet_risk_events</code>, <code>wallet_disputes</code>, <code>wallet_audit_logs</code>, dan <code>ops.finance_audit_events</code>.</li>
+    <li>Nonaktifkan FCM device/token yang salah atau dicurigai.</li>
+    <li>Revoke/suspend perangkat kantin bila public key mismatch atau perangkat tidak sah.</li>
+    <li>Review Midtrans webhook log dan reconciliation queue untuk order yang tidak sinkron.</li>
+    <li>Gunakan notification archive untuk investigasi historis tanpa memenuhi antrean aktif.</li>
+    <li>Catat kejadian pada incident playbook dan backend alert agar tindak lanjut dapat diaudit.</li>
+  </ol>
+
+  <h2>19. Compliance Readiness</h2>
+  <p>Sistem sudah memiliki pondasi untuk kesiapan produksi:</p>
+  <ul>
+    <li>Kontrol akses berbasis RLS dan role.</li>
+    <li>Audit trail untuk perubahan finansial.</li>
+    <li>Webhook payment dengan signature verification.</li>
+    <li>Enkripsi lokal untuk cache dan key material tertentu.</li>
+    <li>Chat E2EE tanpa plaintext server untuk pesan baru.</li>
+    <li>Operasi wallet dengan signature, PIN verifier, risk rules, reconciliation, dan freeze switch.</li>
+    <li>Retensi notifikasi dengan arsip internal.</li>
+    <li>Health snapshot, incident playbook, dan security audit center.</li>
+  </ul>
+  <p>Untuk produksi final, disarankan menutup residual risk advisor secara bertahap, menyiapkan SOP rotasi key/certificate pin, mengaktifkan leaked password protection jika memungkinkan, serta menjalankan test RLS dan payment reconciliation sebelum demo produksi.</p>
+
+  <h2>20. Kesimpulan</h2>
+  <p>Keamanan Al-Hasanah Media bukan sekadar enkripsi satu modul, melainkan kombinasi kontrol Android, database, Edge Function, payment gateway, notification pipeline, audit log, dan cron operasional. Klaim yang tepat untuk sistem ini adalah <strong>defense-in-depth dengan cryptographic enforcement pada area kritis</strong>, bukan klaim absolut bahwa seluruh server atau admin tidak pernah bisa memengaruhi data.</p>
+  <p>Dengan model ini, data wali santri dilindungi oleh RLS dan relasi kepemilikan, chat alumni dilindungi E2EE, finansial dikunci oleh backend online authority dan audit trail, dompet santri diperkuat oleh Ed25519, Argon2id, idempotency, nonce, risk rules, reconciliation, dan freeze switch, sementara operasional dipantau dengan archive, health snapshot, incident playbook, dan security audit center.</p>
+</body>
+</html>

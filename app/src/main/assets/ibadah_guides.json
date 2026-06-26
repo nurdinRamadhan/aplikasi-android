@@ -1,0 +1,294 @@
+{
+  "version": 1,
+  "updatedAt": "2026-05-22",
+  "sources": [
+    {
+      "name": "Kementerian Agama RI - Tuntunan Manasik Haji dan Umrah",
+      "url": "https://haji.go.id/v5/storage/strapi-cms-landing-page/cms/BUKU_TUNTUNAN_MANASIK_HAJI_DAN_UMRAH_2024_160324_a4e62bced6.pdf"
+    },
+    {
+      "name": "Kementerian Agama RI - Doa dan Zikir Manasik Haji dan Umrah",
+      "url": "https://haji.kemenag.go.id/detail/doa-dzikir-haji-dan-umroh"
+    },
+    {
+      "name": "Kementerian Agama RI - Tanya Jawab Fiqih",
+      "url": "https://kemenag.go.id/tanya-jawab-fiqih"
+    }
+  ],
+  "guides": [
+    {
+      "id": "shalat-fardhu",
+      "title": "Tuntunan Shalat Fardhu",
+      "category": "Shalat",
+      "summary": "Panduan ringkas rukun, gerakan, bacaan pokok, dan adab shalat lima waktu.",
+      "icon": "prayer",
+      "chapters": [
+        {
+          "id": "persiapan",
+          "title": "Persiapan Sebelum Shalat",
+          "description": "Pastikan suci dari hadas, pakaian dan tempat shalat bersih, aurat tertutup, menghadap kiblat, dan waktu shalat sudah masuk.",
+          "steps": [
+            "Berwudhu dengan sempurna.",
+            "Membersihkan najis pada badan, pakaian, dan tempat.",
+            "Menghadap kiblat sesuai kemampuan.",
+            "Menata niat di dalam hati karena Allah."
+          ],
+          "notes": [
+            "Niat tempatnya di hati. Lafaz niat dapat membantu sebagian orang, tetapi inti niat adalah kesengajaan ibadah."
+          ]
+        },
+        {
+          "id": "rakaat",
+          "title": "Urutan Rakaat",
+          "description": "Shalat dimulai dengan takbiratul ihram dan diakhiri salam.",
+          "steps": [
+            "Berdiri bagi yang mampu.",
+            "Takbiratul ihram.",
+            "Membaca doa iftitah, Al-Fatihah, lalu surah atau ayat Al-Qur'an.",
+            "Rukuk dengan tuma'ninah.",
+            "Iktidal dengan tuma'ninah.",
+            "Sujud pertama dengan tuma'ninah.",
+            "Duduk di antara dua sujud.",
+            "Sujud kedua.",
+            "Bangkit ke rakaat berikutnya atau duduk tasyahud.",
+            "Tasyahud akhir dan salam."
+          ]
+        },
+        {
+          "id": "bacaan-pokok",
+          "title": "Bacaan Pokok",
+          "description": "Bacaan inti yang umum diajarkan dalam shalat.",
+          "prayers": [
+            {
+              "title": "Rukuk",
+              "arabic": "سُبْحَانَ رَبِّيَ الْعَظِيمِ",
+              "latin": "Subhana rabbiyal 'azhim",
+              "translation": "Mahasuci Tuhanku Yang Mahaagung."
+            },
+            {
+              "title": "Iktidal",
+              "arabic": "رَبَّنَا لَكَ الْحَمْدُ",
+              "latin": "Rabbana lakal hamd",
+              "translation": "Wahai Tuhan kami, bagi-Mu segala puji."
+            },
+            {
+              "title": "Sujud",
+              "arabic": "سُبْحَانَ رَبِّيَ الْأَعْلَى",
+              "latin": "Subhana rabbiyal a'la",
+              "translation": "Mahasuci Tuhanku Yang Mahatinggi."
+            },
+            {
+              "title": "Duduk di Antara Dua Sujud",
+              "arabic": "رَبِّ اغْفِرْ لِي وَارْحَمْنِي وَاجْبُرْنِي وَارْفَعْنِي وَاهْدِنِي وَعَافِنِي وَاعْفُ عَنِّي",
+              "latin": "Rabbighfir li warhamni wajburni warfa'ni wahdini wa 'afini wa'fu 'anni",
+              "translation": "Ya Allah, ampunilah aku, rahmatilah aku, cukupkanlah aku, angkatlah derajatku, berilah petunjuk, kesehatan, dan maafkan aku."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shalat-sunnah",
+      "title": "Shalat Sunnah Pilihan",
+      "category": "Shalat",
+      "summary": "Ringkasan shalat sunnah yang sering diamalkan: Dhuha, Tahajud, Witir, Hajat, Istikharah, Tarawih, dan Id.",
+      "icon": "moon",
+      "chapters": [
+        {
+          "id": "dhuha",
+          "title": "Shalat Dhuha",
+          "description": "Dilakukan pada waktu dhuha setelah matahari naik sampai sebelum zawal.",
+          "steps": [
+            "Niat shalat sunnah Dhuha.",
+            "Dilakukan dua rakaat per salam.",
+            "Membaca Al-Fatihah dan ayat Al-Qur'an.",
+            "Selesai shalat, berdoa dengan hajat yang baik."
+          ]
+        },
+        {
+          "id": "tahajud-witir",
+          "title": "Tahajud dan Witir",
+          "description": "Tahajud dilakukan malam hari setelah tidur. Witir menjadi penutup shalat malam.",
+          "steps": [
+            "Bangun malam dan bersuci.",
+            "Shalat dua rakaat per salam.",
+            "Tutup dengan Witir dalam jumlah rakaat ganjil.",
+            "Perbanyak istighfar dan doa."
+          ]
+        },
+        {
+          "id": "istikharah",
+          "title": "Shalat Istikharah",
+          "description": "Dilakukan saat meminta pilihan terbaik kepada Allah dalam urusan yang mubah atau baik.",
+          "steps": [
+            "Shalat dua rakaat selain shalat wajib.",
+            "Berdoa memohon pilihan terbaik.",
+            "Menyerahkan hasil kepada Allah dan memilih jalan yang dimudahkan."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "haji",
+      "title": "Manasik Haji",
+      "category": "Haji & Umrah",
+      "summary": "Alur utama ibadah haji: ihram, wukuf, mabit, jumrah, tahallul, thawaf, dan sa'i.",
+      "icon": "kaaba",
+      "chapters": [
+        {
+          "id": "rukun-haji",
+          "title": "Rukun Haji",
+          "description": "Rukun adalah bagian pokok yang menentukan sahnya ibadah haji.",
+          "steps": [
+            "Ihram.",
+            "Wukuf di Arafah.",
+            "Thawaf Ifadah.",
+            "Sa'i.",
+            "Tahallul.",
+            "Tertib pada mayoritas rangkaian."
+          ]
+        },
+        {
+          "id": "alur-haji",
+          "title": "Alur Ringkas Pelaksanaan",
+          "description": "Urutan umum manasik haji yang perlu dipahami jamaah.",
+          "steps": [
+            "Berniat ihram dari miqat.",
+            "Menuju Arafah untuk wukuf pada 9 Zulhijah.",
+            "Mabit di Muzdalifah setelah Arafah.",
+            "Melontar Jamrah Aqabah pada 10 Zulhijah.",
+            "Tahallul awal.",
+            "Thawaf Ifadah dan sa'i.",
+            "Mabit di Mina dan melontar jumrah hari Tasyrik.",
+            "Thawaf Wada sebelum meninggalkan Makkah bagi yang wajib melakukannya."
+          ]
+        },
+        {
+          "id": "talbiyah",
+          "title": "Talbiyah",
+          "description": "Bacaan yang dianjurkan selama ihram.",
+          "prayers": [
+            {
+              "title": "Talbiyah",
+              "arabic": "لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ، لَبَّيْكَ لَا شَرِيكَ لَكَ لَبَّيْكَ",
+              "latin": "Labbaik Allahumma labbaik, labbaika la syarika laka labbaik",
+              "translation": "Aku penuhi panggilan-Mu ya Allah, aku penuhi panggilan-Mu. Tiada sekutu bagi-Mu."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "umrah",
+      "title": "Tuntunan Umrah",
+      "category": "Haji & Umrah",
+      "summary": "Panduan inti umrah: ihram dari miqat, thawaf, sa'i, dan tahallul.",
+      "icon": "route",
+      "chapters": [
+        {
+          "id": "rukun-umrah",
+          "title": "Rukun Umrah",
+          "description": "Rukun umrah perlu dilakukan dengan tertib.",
+          "steps": [
+            "Ihram dari miqat.",
+            "Thawaf mengelilingi Ka'bah tujuh putaran.",
+            "Sa'i antara Shafa dan Marwah tujuh lintasan.",
+            "Tahallul dengan mencukur atau memendekkan rambut.",
+            "Tertib."
+          ]
+        },
+        {
+          "id": "adab-umrah",
+          "title": "Adab Selama Umrah",
+          "description": "Jaga kekhusyukan, kebersihan, keselamatan, dan hak jamaah lain.",
+          "steps": [
+            "Memperbanyak zikir, doa, dan membaca Al-Qur'an.",
+            "Tidak menyakiti jamaah lain saat thawaf atau sa'i.",
+            "Mengikuti arahan petugas saat area padat.",
+            "Menghindari perdebatan dan menjaga lisan."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "qurban",
+      "title": "Tuntunan Qurban",
+      "category": "Hari Raya",
+      "summary": "Ringkasan hukum, waktu, hewan, penyembelihan, dan pembagian qurban.",
+      "icon": "gift",
+      "chapters": [
+        {
+          "id": "ketentuan",
+          "title": "Ketentuan Umum",
+          "description": "Qurban dilaksanakan pada Idul Adha dan hari Tasyrik sebagai bentuk taqarrub kepada Allah.",
+          "steps": [
+            "Memilih hewan yang sehat dan memenuhi syarat.",
+            "Melaksanakan penyembelihan setelah shalat Idul Adha sampai akhir hari Tasyrik.",
+            "Menyebut nama Allah saat menyembelih.",
+            "Membagikan daging kepada keluarga, tetangga, dan yang membutuhkan."
+          ],
+          "notes": [
+            "Pelaksanaan teknis sebaiknya mengikuti panitia qurban setempat dan aturan kesehatan hewan yang berlaku."
+          ]
+        },
+        {
+          "id": "doa",
+          "title": "Doa Penyembelihan",
+          "description": "Bacaan ringkas saat menyembelih qurban.",
+          "prayers": [
+            {
+              "title": "Basmalah dan Takbir",
+              "arabic": "بِسْمِ اللّٰهِ، اَللّٰهُ أَكْبَرُ",
+              "latin": "Bismillah, Allahu akbar",
+              "translation": "Dengan nama Allah, Allah Mahabesar."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "thaharah",
+      "title": "Bersuci",
+      "category": "Dasar Ibadah",
+      "summary": "Panduan ringkas wudhu, mandi wajib, dan tayamum sebagai persiapan ibadah.",
+      "icon": "water",
+      "chapters": [
+        {
+          "id": "wudhu",
+          "title": "Wudhu",
+          "description": "Wudhu adalah bersuci dari hadas kecil sebelum shalat dan ibadah tertentu.",
+          "steps": [
+            "Niat berwudhu.",
+            "Membasuh wajah.",
+            "Membasuh kedua tangan sampai siku.",
+            "Mengusap sebagian kepala.",
+            "Membasuh kedua kaki sampai mata kaki.",
+            "Tertib."
+          ]
+        },
+        {
+          "id": "tayamum",
+          "title": "Tayamum",
+          "description": "Tayamum menjadi pengganti wudhu atau mandi wajib ketika air tidak tersedia atau tidak bisa digunakan.",
+          "steps": [
+            "Berniat tayamum.",
+            "Menepukkan tangan ke debu atau permukaan suci yang berdebu.",
+            "Mengusap wajah.",
+            "Mengusap kedua tangan."
+          ]
+        },
+        {
+          "id": "mandi-wajib",
+          "title": "Mandi Wajib",
+          "description": "Mandi wajib dilakukan untuk mengangkat hadas besar.",
+          "steps": [
+            "Niat mengangkat hadas besar.",
+            "Membersihkan bagian tubuh yang terkena najis.",
+            "Meratakan air ke seluruh tubuh.",
+            "Memastikan lipatan dan bagian tersembunyi terkena air."
+          ]
+        }
+      ]
+    }
+  ]
+}

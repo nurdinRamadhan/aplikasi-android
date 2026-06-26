@@ -1,0 +1,55 @@
+# Workflow CI/CD Supabase - ALHASANAH MEDIA
+# Digunakan untuk deploy otomatis skema database dan edge functions ke banyak pesantren.
+
+name: Deploy Supabase (Multi-Pesantren)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/**'
+
+jobs:
+  deploy:
+    name: Deploy ke ${{ matrix.pesantren }}
+    runs-on: ubuntu-latest
+    strategy:
+      # Matrix memungkinkan satu workflow berjalan paralel untuk banyak pesantren
+      matrix:
+        include:
+          - pesantren: alhasanah
+            project_id_key: ALHASANAH_PROJECT_ID
+            db_password_key: ALHASANAH_DB_PASSWORD
+          # Tambahkan pesantren baru di sini:
+          # - pesantren: pesantren_b
+          #   project_id_key: PESANTRENB_PROJECT_ID
+          #   db_password_key: PESANTRENB_DB_PASSWORD
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link Project Supabase
+        run: supabase link --project-ref ${{ secrets[matrix.project_id_key] }} --password ${{ secrets[matrix.db_password_key] }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Push Database Migrations
+        # Menjalankan migrasi baseline dan migrasi baru
+        run: supabase db push --password ${{ secrets[matrix.db_password_key] }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Deploy Edge Functions
+        # Mendeploy seluruh fungsi di folder supabase/functions
+        run: supabase functions deploy --project-ref ${{ secrets[matrix.project_id_key] }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Check Health
+        run: echo "Deployment ke ${{ matrix.pesantren }} selesai dengan sukses."

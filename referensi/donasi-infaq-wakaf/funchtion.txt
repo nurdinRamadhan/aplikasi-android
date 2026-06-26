@@ -1,0 +1,74 @@
+CREATE OR REPLACE FUNCTION public.tr_notify_kesehatan()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    PERFORM public.create_notification_for_wali(
+        NEW.santri_nis,
+        'Laporan Kesehatan',
+        'Keluhan: ' || NEW.keluhan || '. Tindakan: ' || NEW.tindakan,
+        jsonb_build_object('type', 'kesehatan', 'nis', NEW.santri_nis, 'id', NEW.id),
+        'kesehatan_santri'
+    );
+    RETURN NEW;
+END; $function$
+
+CREATE OR REPLACE FUNCTION public.tr_notify_pelanggaran()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    PERFORM public.create_notification_for_wali(
+        NEW.santri_nis,
+        'Catatan Kedisiplinan',
+        'Tercatat pelanggaran: ' || NEW.jenis_pelanggaran || '. Poin: ' || NEW.poin,
+        jsonb_build_object('type', 'pelanggaran', 'nis', NEW.santri_nis, 'id', NEW.id),
+        'pelanggaran_santri'
+    );
+    RETURN NEW;
+END; $function$
+
+CREATE OR REPLACE FUNCTION public.tr_notify_perizinan()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    IF (TG_OP = 'INSERT') OR (OLD.status IS DISTINCT FROM NEW.status) THEN
+        PERFORM public.create_notification_for_wali(
+            NEW.santri_nis,
+            'Update Perizinan',
+            'Izin ' || NEW.jenis_izin || ' sekarang berstatus: ' || NEW.status,
+            jsonb_build_object('type', 'perizinan', 'nis', NEW.santri_nis, 'id', NEW.id),
+            'perizinan_santri'
+        );
+    END IF;
+    RETURN NEW;
+END; $function$
+
+CREATE OR REPLACE FUNCTION public.tr_notify_tagihan()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    PERFORM public.create_notification_for_wali(
+        NEW.santri_nis,
+        'Tagihan Baru',
+        'Ada tagihan baru sebesar Rp ' || NEW.nominal_tagihan || ' untuk ' || NEW.deskripsi_tagihan,
+        jsonb_build_object('type', 'tagihan', 'nis', NEW.santri_nis, 'id', NEW.id),
+        'tagihan_santri'
+    );
+    RETURN NEW;
+END; $function$
+
+
+[
+  {
+    "table_name": "tagihan_santri",
+    "column_name": "status",
+    "constraint_name": "tagihan_santri_status_check",
+    "check_clause": "(status = ANY (ARRAY['LUNAS'::text, 'BELUM'::text, 'CICILAN'::text]))"
+  }
+]
+
+
+
