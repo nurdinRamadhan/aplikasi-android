@@ -23,6 +23,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -194,6 +195,17 @@ fun AlhasanahApp(mainViewModel: MainViewModel, intent: Intent?, isDark: Boolean)
 
         // Immediate check on login
         if (!updateDialogShown) {
+            val result = UpdateChecker.checkUpdateAsync()
+            if (result is com.alhasanah.alhasanahmedia.util.UpdateResult.Available) {
+                updateInfo = result.info
+                updateDialogShown = true
+            }
+        }
+    }
+
+    // Auto-check on every app foreground (resume)
+    LaunchedEffect(Unit) {
+        if (isLoggedIn && !updateDialogShown) {
             val result = UpdateChecker.checkUpdateAsync()
             if (result is com.alhasanah.alhasanahmedia.util.UpdateResult.Available) {
                 updateInfo = result.info
@@ -1101,8 +1113,13 @@ fun DrawerBody(
 ) {
     val isNavEnabled = activeSantriNis != null
     val isKantin = currentUserRole.equals("kantin", ignoreCase = true)
+    val drawerScope = rememberCoroutineScope()
     var showComingSoonDialog by remember { mutableStateOf(false) }
     var comingSoonTitle by remember { mutableStateOf("") }
+    var showUpdateDialog by remember { mutableStateOf(false) }
+    var drawerUpdateInfo by remember { mutableStateOf<com.alhasanah.alhasanahmedia.util.UpdateInfo?>(null) }
+    var showUpdateResultDialog by remember { mutableStateOf(false) }
+    var updateResultMessage by remember { mutableStateOf("") }
 
     if (isLoggedIn) {
         DrawerSectionLabel("MENU UTAMA")
@@ -1208,6 +1225,31 @@ fun DrawerBody(
         onClick = onToggleTheme
     )
 
+    DrawerMenuItemElegant(
+        icon    = Icons.Outlined.SystemUpdate,
+        text    = "Cek Update",
+        onClick = {
+            closeDrawer()
+            drawerScope.launch {
+                val result = com.alhasanah.alhasanahmedia.util.UpdateChecker.checkUpdateAsync()
+                when (result) {
+                    is com.alhasanah.alhasanahmedia.util.UpdateResult.Available -> {
+                        drawerUpdateInfo = result.info
+                        showUpdateDialog = true
+                    }
+                    is com.alhasanah.alhasanahmedia.util.UpdateResult.UpToDate -> {
+                        updateResultMessage = "Aplikasi sudah versi terbaru ✓"
+                        showUpdateResultDialog = true
+                    }
+                    is com.alhasanah.alhasanahmedia.util.UpdateResult.Error -> {
+                        updateResultMessage = "Gagal cek update: ${result.message}"
+                        showUpdateResultDialog = true
+                    }
+                }
+            }
+        }
+    )
+
     if (isLoggedIn) {
         DrawerMenuItemElegant(
             icon      = Icons.Outlined.Logout,
@@ -1223,6 +1265,31 @@ fun DrawerBody(
         ComingSoonDialog(
             title = comingSoonTitle,
             onDismiss = { showComingSoonDialog = false }
+        )
+    }
+
+    // Update dialog
+    if (showUpdateDialog && drawerUpdateInfo != null) {
+        com.alhasanah.alhasanahmedia.ui.components.UpdateDialog(
+            info = drawerUpdateInfo!!,
+            onDismiss = {
+                showUpdateDialog = false
+                drawerUpdateInfo = null
+            }
+        )
+    }
+
+    // Update result dialog (up-to-date / error)
+    if (showUpdateResultDialog) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showUpdateResultDialog = false },
+            title = { Text("Cek Update") },
+            text = { Text(updateResultMessage) },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = { showUpdateResultDialog = false }) {
+                    Text("OK")
+                }
+            }
         )
     }
 }
