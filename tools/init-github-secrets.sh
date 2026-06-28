@@ -39,27 +39,32 @@ fi
 # Cek login
 gh auth status &> /dev/null || { echo "ERROR: Belum login! Jalankan: gh auth login"; exit 1; }
 
-# Source local.properties
-source <(grep -E '^[a-zA-Z_]+=' "$LOCAL_PROPERTIES")
+# Parse local.properties (handle dots in keys)
+RELEASE_KEYSTORE_PASSWORD=$(grep '^release.keystore.password=' "$LOCAL_PROPERTIES" | cut -d'=' -f2-)
+RELEASE_KEY_ALIAS=$(grep '^release.key.alias=' "$LOCAL_PROPERTIES" | cut -d'=' -f2-)
+RELEASE_KEY_PASSWORD=$(grep '^release.key.password=' "$LOCAL_PROPERTIES" | cut -d'=' -f2-)
+SUPABASE_URL=$(grep '^supabase.url=' "$LOCAL_PROPERTIES" | cut -d'=' -f2-)
+SUPABASE_ANON_KEY=$(grep '^supabase.anon.key=' "$LOCAL_PROPERTIES" | cut -d'=' -f2-)
+AHMAD_SANUSI_API_KEY=$(grep '^ahmadsanusi.api.key=' "$LOCAL_PROPERTIES" | cut -d'=' -f2-)
 
 echo ""
 echo "1. KEYSTORE_BASE64 — dari keystores.jks"
-gh secret set KEYSTORE_BASE64 < "$KEYSTORE" --base64
+base64 -w0 "$KEYSTORE" | gh secret set KEYSTORE_BASE64 -b "@-"
 echo "   OK"
 
 echo ""
 echo "2. String secrets — dari local.properties"
-gh secret set RELEASE_KEYSTORE_PASSWORD --body "$release.keystore.password"
-gh secret set RELEASE_KEY_ALIAS --body "$release.key.alias"
-gh secret set RELEASE_KEY_PASSWORD --body "$release.key.password"
-gh secret set SUPABASE_URL --body "$supabase.url"
-gh secret set SUPABASE_ANON_KEY --body "$supabase.anon.key"
-gh secret set AHMAD_SANUSI_API_KEY --body "$ahmadsanusi.api.key"
+gh secret set RELEASE_KEYSTORE_PASSWORD -b "$RELEASE_KEYSTORE_PASSWORD"
+gh secret set RELEASE_KEY_ALIAS -b "$RELEASE_KEY_ALIAS"
+gh secret set RELEASE_KEY_PASSWORD -b "$RELEASE_KEY_PASSWORD"
+gh secret set SUPABASE_URL -b "$SUPABASE_URL"
+gh secret set SUPABASE_ANON_KEY -b "$SUPABASE_ANON_KEY"
+gh secret set AHMAD_SANUSI_API_KEY -b "$AHMAD_SANUSI_API_KEY"
 echo "   OK"
 
 echo ""
 echo "3. GOOGLE_SERVICES_JSON — dari app/google-services.json"
-gh secret set GOOGLE_SERVICES_JSON < "$GOOGLE_SERVICES"
+gh secret set GOOGLE_SERVICES_JSON -b "$(cat "$GOOGLE_SERVICES")"
 echo "   OK"
 
 echo ""

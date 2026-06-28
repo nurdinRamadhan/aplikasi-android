@@ -61,6 +61,7 @@ import com.alhasanah.alhasanahmedia.navigation.Screen
 import com.alhasanah.alhasanahmedia.ui.admin.AdminWebViewPreloader
 import com.alhasanah.alhasanahmedia.ui.auth.AuthViewModel
 import com.alhasanah.alhasanahmedia.ui.components.AppGradientBackground
+import com.alhasanah.alhasanahmedia.ui.components.ComingSoonDialog
 import com.alhasanah.alhasanahmedia.ui.components.ThemeToggleButton
 import com.alhasanah.alhasanahmedia.ui.components.appPanelBorderColor
 import com.alhasanah.alhasanahmedia.ui.components.appPanelColor
@@ -99,6 +100,10 @@ fun HomeContent(
     val isSystemDark    = isSystemInDarkTheme()
     val useDarkTheme    = themeMode ?: isSystemDark
     val context = LocalContext.current
+
+    // Coming Soon dialog state
+    var showComingSoonDialog by remember { mutableStateOf(false) }
+    var comingSoonTitle by remember { mutableStateOf("") }
 
     LaunchedEffect(isLoggedIn, activeSantriNis, currentUserRole) {
         homeViewModel.loadSantriSummary(
@@ -215,11 +220,13 @@ fun HomeContent(
                             } else if (featureName.contains("Jadwal")) {
                                 navController.navigate(Screen.PrayerSchedule.route)
                             } else if (featureName.contains("Falaq")) {
-                                navController.navigate(Screen.FalakEphemeris.route)
+                                comingSoonTitle = "Falaq Ephemeris"
+                                showComingSoonDialog = true
                             } else if (featureName.contains("Cuaca")) {
                                 navController.navigate(Screen.Weather.route)
                             } else if (featureName.contains("Kiblat")) {
-                                navController.navigate(Screen.Qibla.route)
+                                comingSoonTitle = "Kiblat"
+                                showComingSoonDialog = true
                             }
                         }
                     )
@@ -235,9 +242,11 @@ fun HomeContent(
                         isDark = useDarkTheme,
                         onFeatureClick = { featureName ->
                             if (featureName.contains("Admin")) {
-                                navController.navigate(Screen.AdminPanel.createRoute())
+                                comingSoonTitle = "Admin Panel"
+                                showComingSoonDialog = true
                             } else if (featureName.contains("Forum")) {
-                                navController.navigate(Screen.AlumniForum.createRoute())
+                                comingSoonTitle = "Forum Alumni"
+                                showComingSoonDialog = true
                             } else if (featureName.contains("Prestasi")) {
                                 navController.navigate(Screen.Prestasi.route)
                             }
@@ -303,6 +312,14 @@ fun HomeContent(
                 )
             }
         }
+    }
+
+    // Coming Soon dialog
+    if (showComingSoonDialog) {
+        ComingSoonDialog(
+            title = comingSoonTitle,
+            onDismiss = { showComingSoonDialog = false }
+        )
     }
 }
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1187,10 +1204,10 @@ private fun PremiumFeatureSection(
                                 }
                                 repeat((3 - rowItems.size).coerceAtLeast(0)) {
                                     Spacer(modifier = Modifier.weight(1f))
-                                }
-                            }
-                        }
-                    }
+            }
+        }
+    }
+}
                 }
             }
 

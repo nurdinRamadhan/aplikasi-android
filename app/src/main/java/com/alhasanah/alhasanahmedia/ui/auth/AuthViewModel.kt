@@ -126,6 +126,11 @@ class AuthViewModel(
     fun signOut() {
         viewModelScope.launch {
             try {
+                // Deactivate FCM device before signing out
+                runCatching {
+                    val token = FirebaseMessaging.getInstance().token.await()
+                    notificationRepository.deactivateMyFcmDevice(token)
+                }
                 runCatching { waliSantriRepository.clearSensitiveCache() }
                 authRepository.signOut()
             } catch (e: Exception) {

@@ -159,6 +159,9 @@ dependencies {
     implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.coroutines.play.services)
 
+    // WorkManager - periodic background tasks
+    implementation(libs.androidx.work.runtime)
+
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)

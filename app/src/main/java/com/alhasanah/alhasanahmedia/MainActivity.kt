@@ -58,14 +58,19 @@ import androidx.navigation.compose.rememberNavController
 import com.alhasanah.alhasanahmedia.navigation.AppNavHost
 import com.alhasanah.alhasanahmedia.navigation.Screen
 import com.alhasanah.alhasanahmedia.data.repository.NotificationRepository
+import com.alhasanah.alhasanahmedia.fcm.MyFirebaseMessagingService
 import com.alhasanah.alhasanahmedia.ui.alumni.AlumniPremiumTheme
 import com.alhasanah.alhasanahmedia.ui.admin.ADMIN_PANEL_URL
 import com.alhasanah.alhasanahmedia.ui.admin.AdminWebViewPreloader
 import com.alhasanah.alhasanahmedia.ui.auth.AuthViewModel
 import com.alhasanah.alhasanahmedia.ui.auth.AuthenticationState
 import com.alhasanah.alhasanahmedia.ui.components.AppGradientBackground
+import com.alhasanah.alhasanahmedia.ui.components.ComingSoonDialog
+import com.alhasanah.alhasanahmedia.ui.components.UpdateDialog
 import com.alhasanah.alhasanahmedia.ui.theme.AlhasanahMediaTheme
-import com.google.firebase.messaging.FirebaseMessaging
+import com.alhasanah.alhasanahmedia.util.UpdateCheckWorker
+import com.alhasanah.alhasanahmedia.util.UpdateChecker
+import com.alhasanah.alhasanahmedia.util.UpdateResult
 import io.github.jan.supabase.auth.user.UserInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -174,20 +179,68 @@ fun AlhasanahApp(mainViewModel: MainViewModel, intent: Intent?, isDark: Boolean)
 
     LaunchedEffect(isLoggedIn, user?.id) {
         if (!isLoggedIn || user == null) return@LaunchedEffect
-        runCatching {
-            notificationRepository.registerMyFcmDevice(
-                token = FirebaseMessaging.getInstance().token.await(),
-                deviceId = Settings.Secure.getString(
-                    context.contentResolver,
-                    Settings.Secure.ANDROID_ID
-                ).orEmpty(),
-                appInstanceId = null
-            )
+        // Register any pending FCM token from onNewToken (if session was unavailable)
+        MyFirebaseMessagingService.registerPendingToken(context, notificationRepository)
+    }
+
+    // Update checker — cek sekali saat login + schedule periodic check
+    var updateDialogShown by remember { mutableStateOf(false) }
+    var updateInfo by remember { mutableStateOf<com.alhasanah.alhasanahmedia.util.UpdateInfo?>(null) }
+    LaunchedEffect(isLoggedIn, user?.id) {
+        if (!isLoggedIn || user == null) return@LaunchedEffect
+
+        // Schedule periodic background check (every 6 hours)
+        UpdateCheckWorker.schedule(context)
+
+        // Immediate check on login
+        if (!updateDialogShown) {
+            val result = UpdateChecker.checkUpdateAsync()
+            if (result is com.alhasanah.alhasanahmedia.util.UpdateResult.Available) {
+                updateInfo = result.info
+                updateDialogShown = true
+            }
         }
     }
 
     LaunchedEffect(intent, isLoggedIn, activeSantriNis) {
         if (intent != null) {
+            // Handle notification tap to open update dialog
+            if (intent.getBooleanExtra("open_update_dialog", false)) {
+                val version = intent.getStringExtra("update_version") ?: ""
+                val changelog = intent.getStringExtra("update_changelog") ?: ""
+                val readyToInstall = intent.getBooleanExtra("update_ready_to_install", false)
+
+                if (readyToInstall) {
+                    // APK already downloaded — show dialog for install
+                    val downloadedApk = UpdateChecker.findDownloadedApk(context)
+                    if (downloadedApk != null) {
+                        updateInfo = com.alhasanah.alhasanahmedia.util.UpdateInfo(
+                            versionName = version,
+                            versionCode = 0,
+                            changelog = "APK sudah diunduh. Tap untuk install.",
+                            downloadUrl = "",
+                            fileSize = downloadedApk.length(),
+                            releaseDate = ""
+                        )
+                        updateDialogShown = true
+                    }
+                } else {
+                    // Show available update dialog
+                    updateInfo = com.alhasanah.alhasanahmedia.util.UpdateInfo(
+                        versionName = version,
+                        versionCode = 0,
+                        changelog = changelog,
+                        downloadUrl = "",
+                        fileSize = 0,
+                        releaseDate = ""
+                    )
+                    updateDialogShown = true
+                }
+                intent.removeExtra("open_update_dialog")
+                intent.removeExtra("update_ready_to_install")
+                return@LaunchedEffect
+            }
+
             parseAdminPanelDeepLink(intent)?.let { adminUrl ->
                 navController.navigate(Screen.AdminPanel.createRoute(adminUrl)) {
                     launchSingleTop = true
@@ -323,15 +376,25 @@ fun AlhasanahApp(mainViewModel: MainViewModel, intent: Intent?, isDark: Boolean)
         }
     }
 
+    // Update dialog
+    if (updateDialogShown) {
+        updateInfo?.let { info ->
+            UpdateDialog(
+                info = info,
+                onDismiss = { updateDialogShown = false }
+            )
+        }
+    }
+
     if (showLogoutDialog) {
         LogoutConfirmationDialog(
             onDismiss = { showLogoutDialog = false },
-                onConfirm = {
-                    showLogoutDialog = false
-                    AdminWebViewPreloader.clearSession()
-                    authViewModel.signOut()
-                }
-            )
+            onConfirm = {
+                showLogoutDialog = false
+                AdminWebViewPreloader.clearSession()
+                authViewModel.signOut()
+            }
+        )
     }
 }
 
@@ -1038,6 +1101,8 @@ fun DrawerBody(
 ) {
     val isNavEnabled = activeSantriNis != null
     val isKantin = currentUserRole.equals("kantin", ignoreCase = true)
+    var showComingSoonDialog by remember { mutableStateOf(false) }
+    var comingSoonTitle by remember { mutableStateOf("") }
 
     if (isLoggedIn) {
         DrawerSectionLabel("MENU UTAMA")
@@ -1086,7 +1151,9 @@ fun DrawerBody(
             closeDrawer(); navController.navigate(Screen.Keuangan.createRoute(activeSantriNis!!))
         }
         DrawerMenuItemElegant(icon = Icons.Outlined.AccountBalanceWallet, text = "Dompet Santri", isEnabled = isNavEnabled) {
-            closeDrawer(); navController.navigate(Screen.WalletWali.createRoute(activeSantriNis!!))
+            closeDrawer()
+            comingSoonTitle = "Dompet Santri"
+            showComingSoonDialog = true
         }
         if (isKantin) {
             DrawerMenuItemElegant(icon = Icons.Outlined.PointOfSale, text = "Kantin Merchant", isEnabled = true) {
@@ -1148,6 +1215,14 @@ fun DrawerBody(
             textColor = MaterialTheme.colorScheme.error,
             iconColor = MaterialTheme.colorScheme.error,
             onClick   = onLogout
+        )
+    }
+
+    // Coming Soon dialog
+    if (showComingSoonDialog) {
+        ComingSoonDialog(
+            title = comingSoonTitle,
+            onDismiss = { showComingSoonDialog = false }
         )
     }
 }

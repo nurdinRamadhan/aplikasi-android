@@ -3,4 +3,7 @@
     <cache-path
         name="admin_upload_cache"
         path="Pictures/" />
+    <files-path
+        name="update_apk"
+        path="updates/" />
 </paths>

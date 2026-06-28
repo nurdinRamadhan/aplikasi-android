@@ -43,6 +43,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        // Save token locally — will be registered when user session is available
+        savePendingToken(token)
         sendTokenToBackend(token)
     }
 
@@ -67,6 +69,13 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
+    private fun savePendingToken(token: String) {
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            .edit()
+            .putString(KEY_PENDING_TOKEN, token)
+            .apply()
+    }
+
     private fun sendTokenToBackend(token: String) {
         val currentUser = auth.currentUserOrNull()
         if (currentUser != null) {
@@ -77,13 +86,55 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                         deviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID).orEmpty(),
                         appInstanceId = null
                     )
+                    // Clear pending token on success
+                    clearPendingToken()
                     Log.d(TAG, "FCM token registered")
                 } catch (e: Exception) {
-                    Log.e(TAG, "Error registering FCM token")
+                    Log.e(TAG, "Error registering FCM token, will retry on next login")
                 }
             }
         } else {
-            Log.d(TAG, "No user logged in, token not registered")
+            Log.d(TAG, "No user logged in, token saved as pending")
+        }
+    }
+
+    private fun clearPendingToken() {
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            .edit()
+            .remove(KEY_PENDING_TOKEN)
+            .apply()
+    }
+
+    companion object {
+        private const val TAG = "MyFCMService"
+        private const val GENERAL_CHANNEL_ID = "alhasanah_notif_channel"
+        private const val CHAT_CHANNEL_ID = "alhasanah_chat_channel"
+        const val PREFS_NAME = "fcm_pending"
+        const val KEY_PENDING_TOKEN = "pending_token"
+
+        /** Called on login to register any pending token. */
+        fun registerPendingToken(context: Context, notificationRepository: NotificationRepository) {
+            val pending = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .getString(KEY_PENDING_TOKEN, null)
+            if (pending.isNullOrBlank()) return
+
+            val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+            scope.launch {
+                try {
+                    notificationRepository.registerMyFcmDevice(
+                        token = pending,
+                        deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID).orEmpty(),
+                        appInstanceId = null
+                    )
+                    context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                        .edit()
+                        .remove(KEY_PENDING_TOKEN)
+                        .apply()
+                    Log.d(TAG, "Pending FCM token registered on login")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to register pending token", e)
+                }
+            }
         }
     }
 
@@ -145,7 +196,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             putExtra("notif_wallet_ledger_id", walletLedgerId)
         }
 
-        val notificationId = conversationId?.hashCode() ?: System.currentTimeMillis().toInt()
+        // Use type + id for unique notificationId to avoid collision
+        val notifKey = "${type ?: ""}_${id ?: ""}_${conversationId ?: ""}"
+        val notificationId = notifKey.hashCode()
 
         val pendingIntent = PendingIntent.getActivity(
             this, notificationId, intent,
@@ -220,11 +273,5 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onDestroy() {
         super.onDestroy()
         job.cancel()
-    }
-
-    companion object {
-        private const val TAG = "MyFCMService"
-        private const val GENERAL_CHANNEL_ID = "alhasanah_notif_channel"
-        private const val CHAT_CHANNEL_ID = "alhasanah_chat_channel"
     }
 }
