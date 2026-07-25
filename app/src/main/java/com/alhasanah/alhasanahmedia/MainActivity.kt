@@ -59,6 +59,7 @@ import androidx.navigation.compose.rememberNavController
 import com.alhasanah.alhasanahmedia.navigation.AppNavHost
 import com.alhasanah.alhasanahmedia.navigation.Screen
 import com.alhasanah.alhasanahmedia.data.repository.NotificationRepository
+import com.alhasanah.alhasanahmedia.data.repository.AnnouncementRepository
 import com.alhasanah.alhasanahmedia.fcm.MyFirebaseMessagingService
 import com.alhasanah.alhasanahmedia.ui.alumni.AlumniPremiumTheme
 import com.alhasanah.alhasanahmedia.ui.admin.ADMIN_PANEL_URL
@@ -67,11 +68,20 @@ import com.alhasanah.alhasanahmedia.ui.auth.AuthViewModel
 import com.alhasanah.alhasanahmedia.ui.auth.AuthenticationState
 import com.alhasanah.alhasanahmedia.ui.components.AppGradientBackground
 import com.alhasanah.alhasanahmedia.ui.components.ComingSoonDialog
+import com.alhasanah.alhasanahmedia.ui.components.AnnouncementDialog
 import com.alhasanah.alhasanahmedia.ui.components.UpdateDialog
+import com.alhasanah.alhasanahmedia.ui.tutorial.TutorialPhase
+import com.alhasanah.alhasanahmedia.ui.tutorial.UserTypeSelectionDialog
+import com.alhasanah.alhasanahmedia.ui.tutorial.tutorialMsg
+import com.alhasanah.alhasanahmedia.ui.tutorial.LocalShowcaseScope
 import com.alhasanah.alhasanahmedia.ui.theme.AlhasanahMediaTheme
+import com.alhasanah.alhasanahmedia.showcase.ui.ShowcaseLayout
+import com.alhasanah.alhasanahmedia.showcase.model.ShowcaseMsg
 import com.alhasanah.alhasanahmedia.util.UpdateCheckWorker
 import com.alhasanah.alhasanahmedia.util.UpdateChecker
+import com.alhasanah.alhasanahmedia.util.AnnouncementPreferences
 import com.alhasanah.alhasanahmedia.util.UpdateResult
+import com.alhasanah.alhasanahmedia.util.isAppInDarkTheme
 import io.github.jan.supabase.auth.user.UserInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -178,6 +188,73 @@ fun AlhasanahApp(mainViewModel: MainViewModel, intent: Intent?, isDark: Boolean)
     val currentRoute = navBackStackEntry?.destination?.route
     var showLogoutDialog by remember { mutableStateOf(false) }
 
+    // ── Tutorial State ─────────────────────────────────────────────────────
+    val userType by mainViewModel.userType.collectAsState()
+    val hasCompletedTutorial by mainViewModel.hasCompletedTutorial.collectAsState()
+    val hasCompletedTutorialPhase2 by mainViewModel.hasCompletedTutorialPhase2.collectAsState()
+    var showUserTypeDialog by remember { mutableStateOf(false) }
+    var tutorialPhase by remember { mutableStateOf(TutorialPhase.NONE) }
+    var announcementDismissed by remember { mutableStateOf(false) }
+    var isShowcasing by remember { mutableStateOf(false) }
+
+    // ── Step 1: Cek announcement + user type, tampilkan secara sequential ──
+    val announcementRepository: AnnouncementRepository = koinInject()
+    val announcementPreferences = remember { AnnouncementPreferences(context) }
+    var showAnnouncementDialog by remember { mutableStateOf(false) }
+    var announcements by remember { mutableStateOf<List<com.alhasanah.alhasanahmedia.data.model.Announcement>>(emptyList()) }
+
+    // Unified flow: splash → announcement (if any) → user type dialog
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(3500) // Wait for splash
+
+        // Cek announcement dulu
+        try {
+            val result = announcementRepository.getActiveAnnouncements()
+            if (result.isNotEmpty() && !announcementPreferences.hasShownToday()) {
+                announcements = result
+                showAnnouncementDialog = true
+            } else {
+                // Tidak ada announcement → langsung ke user type dialog
+                if (userType == null) {
+                    showUserTypeDialog = true
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("Announcement", "Failed to fetch announcements", e)
+            // Error → langsung ke user type dialog
+            if (userType == null) {
+                showUserTypeDialog = true
+            }
+        }
+    }
+
+    // Step 2: Setelah announcement di-dismiss, tampilkan user type dialog
+    LaunchedEffect(announcementDismissed) {
+        if (announcementDismissed && userType == null) {
+            showUserTypeDialog = true
+            announcementDismissed = false
+        }
+    }
+
+    // Check if Phase 1 tutorial should start (wali santri & not completed & not logged in)
+    LaunchedEffect(userType, hasCompletedTutorial, isLoggedIn) {
+        if (userType == "wali_santri" && !hasCompletedTutorial && !isLoggedIn) {
+            kotlinx.coroutines.delay(500)
+            tutorialPhase = TutorialPhase.PHASE_1_STEP_1
+            isShowcasing = true
+        }
+    }
+
+    // Check if Phase 2 tutorial should start (wali santri, completed phase 1, just logged in)
+    LaunchedEffect(isLoggedIn, userType, hasCompletedTutorial, hasCompletedTutorialPhase2) {
+        if (isLoggedIn && userType == "wali_santri" && hasCompletedTutorial && !hasCompletedTutorialPhase2) {
+            kotlinx.coroutines.delay(1500)
+            tutorialPhase = TutorialPhase.PHASE_2_STEP_1
+            isShowcasing = true
+            scope.launch { drawerState.open() }
+        }
+    }
+
     LaunchedEffect(isLoggedIn, user?.id) {
         if (!isLoggedIn || user == null) return@LaunchedEffect
         // Register any pending FCM token from onNewToken (if session was unavailable)
@@ -212,6 +289,33 @@ fun AlhasanahApp(mainViewModel: MainViewModel, intent: Intent?, isDark: Boolean)
                 updateDialogShown = true
             }
         }
+    }
+
+    if (showAnnouncementDialog && announcements.isNotEmpty()) {
+        AnnouncementDialog(
+            announcements = announcements,
+            onDismiss = {
+                showAnnouncementDialog = false
+                announcementDismissed = true
+                kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                    announcementPreferences.markShownToday()
+                }
+            }
+        )
+    }
+
+    // ── User Type Selection Dialog ──────────────────────────────────────────
+    if (showUserTypeDialog) {
+        UserTypeSelectionDialog(
+            onWaliSantriSelected = {
+                mainViewModel.setUserType("wali_santri")
+                showUserTypeDialog = false
+            },
+            onGuestSelected = {
+                mainViewModel.setUserType("guest")
+                showUserTypeDialog = false
+            }
+        )
     }
 
     LaunchedEffect(intent, isLoggedIn, activeSantriNis) {
@@ -329,6 +433,82 @@ fun AlhasanahApp(mainViewModel: MainViewModel, intent: Intent?, isDark: Boolean)
         BackHandler { scope.launch { drawerState.close() } }
     }
 
+    val tutorialGreeting = when (tutorialPhase) {
+        TutorialPhase.PHASE_1_STEP_1 -> ShowcaseMsg(
+            text = "Selamat datang! Mari kita kenali fitur aplikasi ini.",
+            textStyle = androidx.compose.ui.text.TextStyle(
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        )
+        TutorialPhase.PHASE_2_STEP_1 -> ShowcaseMsg(
+            text = "Berikut adalah fitur-fitur yang tersedia untuk Anda.",
+            textStyle = androidx.compose.ui.text.TextStyle(
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        )
+        else -> null
+    }
+    val isDarkTutorial = isAppInDarkTheme()
+    ShowcaseLayout(
+        isShowcasing = isShowcasing,
+        isDarkLayout = isDarkTutorial,
+        initIndex = if (tutorialGreeting == null) 1 else 0,
+        onFinish = {
+            isShowcasing = false
+            when (tutorialPhase) {
+                TutorialPhase.PHASE_1_STEP_1 -> {
+                    tutorialPhase = TutorialPhase.PHASE_1_STEP_2
+                    scope.launch {
+                        drawerState.open()
+                        kotlinx.coroutines.delay(350)
+                        isShowcasing = true
+                    }
+                }
+                TutorialPhase.PHASE_1_STEP_2 -> {
+                    tutorialPhase = TutorialPhase.PHASE_1_STEP_3
+                    scope.launch {
+                        drawerState.close()
+                        navController.navigate(Screen.Login.route) {
+                            launchSingleTop = true
+                        }
+                        kotlinx.coroutines.delay(650)
+                        isShowcasing = true
+                    }
+                }
+                TutorialPhase.PHASE_1_STEP_3 -> {
+                    mainViewModel.completeTutorial()
+                    tutorialPhase = TutorialPhase.NONE
+                }
+                TutorialPhase.PHASE_2_STEP_1 -> {
+                    tutorialPhase = TutorialPhase.PHASE_2_STEP_2
+                    scope.launch {
+                        drawerState.open()
+                        kotlinx.coroutines.delay(350)
+                        isShowcasing = true
+                    }
+                }
+                TutorialPhase.PHASE_2_STEP_2 -> {
+                    tutorialPhase = TutorialPhase.PHASE_2_STEP_3
+                    scope.launch {
+                        kotlinx.coroutines.delay(250)
+                        isShowcasing = true
+                    }
+                }
+                TutorialPhase.PHASE_2_STEP_3 -> {
+                    mainViewModel.completeTutorialPhase2()
+                    tutorialPhase = TutorialPhase.NONE
+                    scope.launch { drawerState.close() }
+                }
+                TutorialPhase.NONE -> Unit
+            }
+        },
+        greeting = tutorialGreeting
+    ) {
+    CompositionLocalProvider(LocalShowcaseScope provides this) {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -339,6 +519,13 @@ fun AlhasanahApp(mainViewModel: MainViewModel, intent: Intent?, isDark: Boolean)
                 currentUserRole = currentUserRole,
                 navController   = navController,
                 isDark          = isDark,
+                tutorialPhase   = tutorialPhase,
+                onTutorialReplay = {
+                    scope.launch { drawerState.close() }
+                    mainViewModel.resetTutorial()
+                    tutorialPhase = TutorialPhase.PHASE_1_STEP_1
+                    isShowcasing = true
+                },
                 closeDrawer     = { scope.launch { drawerState.close() } },
                 onLogout        = {
                     scope.launch { drawerState.close() }
@@ -381,12 +568,15 @@ fun AlhasanahApp(mainViewModel: MainViewModel, intent: Intent?, isDark: Boolean)
                     AppNavHost(
                         navController = navController,
                         isLoggedIn    = isLoggedIn,
-                        openDrawer    = { scope.launch { drawerState.open() } }
+                        openDrawer    = { scope.launch { drawerState.open() } },
+                        tutorialPhase = tutorialPhase
                     )
                 }
             }
         }
     }
+    } // end CompositionLocalProvider
+    } // end ShowcaseLayout
 
     // Update dialog
     if (updateDialogShown) {
@@ -855,45 +1045,75 @@ fun AppDrawerContent(
     currentUserRole: String?,
     navController: NavHostController,
     isDark: Boolean,
+    tutorialPhase: TutorialPhase = TutorialPhase.NONE,
+    onTutorialReplay: () -> Unit = {},
     closeDrawer: () -> Unit,
     onLogout: () -> Unit,
     onToggleTheme: () -> Unit
 ) {
     ModalDrawerSheet(
         modifier              = Modifier.fillMaxWidth(0.85f),
-        // Dark mode: sangat gelap dengan sentuhan hangat, bukan abu-abu generic
         drawerContainerColor  = if (isDark) Color(0xFF0C0B10) else MaterialTheme.colorScheme.surface,
         drawerShape           = RoundedCornerShape(topEnd = 28.dp, bottomEnd = 28.dp),
         drawerTonalElevation  = 0.dp
     ) {
-        Column(modifier = Modifier.fillMaxHeight()) {
+        DrawerContentColumn(
+            isLoggedIn = isLoggedIn,
+            user = user,
+            activeSantriNis = activeSantriNis,
+            currentUserRole = currentUserRole,
+            navController = navController,
+            tutorialPhase = tutorialPhase,
+            onTutorialReplay = onTutorialReplay,
+            closeDrawer = closeDrawer,
+            onLogout = onLogout,
+            onToggleTheme = onToggleTheme
+        )
+    }
+}
 
-            // ── Header ─────────────────────────────────────────────────────
-            DrawerHeader(user = user, isDark = isDark)
+@Composable
+private fun DrawerContentColumn(
+    isLoggedIn: Boolean,
+    user: UserInfo?,
+    activeSantriNis: String?,
+    currentUserRole: String?,
+    navController: NavHostController,
+    tutorialPhase: TutorialPhase,
+    onTutorialReplay: () -> Unit,
+    closeDrawer: () -> Unit,
+    onLogout: () -> Unit,
+    onToggleTheme: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxHeight()) {
 
-            // ── Scrollable menu body ────────────────────────────────────────
-            Box(modifier = Modifier.weight(1f)) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                ) {
-                    DrawerBody(
-                        isLoggedIn      = isLoggedIn,
-                        activeSantriNis = activeSantriNis,
-                        currentUserRole = currentUserRole,
-                        navController   = navController,
-                        closeDrawer     = closeDrawer,
-                        onLogout        = onLogout,
-                        onToggleTheme   = onToggleTheme
-                    )
-                }
+        // ── Header ─────────────────────────────────────────────────────
+        DrawerHeader(user = user, isDark = isAppInDarkTheme())
+
+        // ── Scrollable menu body ────────────────────────────────────────
+        Box(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+                DrawerBody(
+                    isLoggedIn      = isLoggedIn,
+                    activeSantriNis = activeSantriNis,
+                    currentUserRole = currentUserRole,
+                    navController   = navController,
+                    tutorialPhase   = tutorialPhase,
+                    onTutorialReplay = onTutorialReplay,
+                    closeDrawer     = closeDrawer,
+                    onLogout        = onLogout,
+                    onToggleTheme   = onToggleTheme
+                )
             }
-
-            // ── Footer brand — ornamen + versi ─────────────────────────────
-            DrawerFooter()
         }
+
+        // ── Footer brand — ornamen + versi ─────────────────────────────
+        DrawerFooter()
     }
 }
 
@@ -1107,6 +1327,8 @@ fun DrawerBody(
     activeSantriNis: String?,
     currentUserRole: String?,
     navController: NavHostController,
+    tutorialPhase: TutorialPhase = TutorialPhase.NONE,
+    onTutorialReplay: () -> Unit = {},
     closeDrawer: () -> Unit,
     onLogout: () -> Unit,
     onToggleTheme: () -> Unit
@@ -1120,6 +1342,7 @@ fun DrawerBody(
     var drawerUpdateInfo by remember { mutableStateOf<com.alhasanah.alhasanahmedia.util.UpdateInfo?>(null) }
     var showUpdateResultDialog by remember { mutableStateOf(false) }
     var updateResultMessage by remember { mutableStateOf("") }
+    val showcaseScope = LocalShowcaseScope.current
 
     if (isLoggedIn) {
         DrawerSectionLabel("MENU UTAMA")
@@ -1135,10 +1358,45 @@ fun DrawerBody(
         )
 
         Spacer(modifier = Modifier.height(8.dp))
-        DrawerSectionLabel("FITUR SANTRI")
 
-        DrawerMenuItemElegant(icon = Icons.Outlined.Person, text = "Profil Santri", isEnabled = isNavEnabled) {
-            closeDrawer(); navController.navigate(Screen.SantriDetail.createRoute(activeSantriNis!!))
+        // Tutorial Target: Phase 2 Step 2 - "FITUR SANTRI" section
+        val fiturSantriLabelModifier = if (tutorialPhase == TutorialPhase.PHASE_2_STEP_2 && showcaseScope != null) {
+            with(showcaseScope) {
+                Modifier.showcase(
+                    index = 1,
+                    message = tutorialMsg(
+                        text = "Menu Wali Santri — Scroll ke bawah untuk melihat semua menu: Profil, Absensi, Hafalan, dan lainnya.",
+                        isDark = isSystemInDarkTheme()
+                    )
+                )
+            }
+        } else {
+            Modifier
+        }
+
+        Box(modifier = fiturSantriLabelModifier) {
+            DrawerSectionLabel("FITUR SANTRI")
+        }
+
+        // Tutorial Target: Phase 2 Step 3 - "Profil Santri"
+        val profilSantriModifier = if (tutorialPhase == TutorialPhase.PHASE_2_STEP_3 && showcaseScope != null) {
+            with(showcaseScope) {
+                Modifier.showcase(
+                    index = 1,
+                    message = tutorialMsg(
+                        text = "Profil Santri — Lihat data lengkap santri Anda, termasuk info pribadi dan akademik.",
+                        isDark = isSystemInDarkTheme()
+                    )
+                )
+            }
+        } else {
+            Modifier
+        }
+
+        Box(modifier = profilSantriModifier) {
+            DrawerMenuItemElegant(icon = Icons.Outlined.Person, text = "Profil Santri", isEnabled = isNavEnabled) {
+                closeDrawer(); navController.navigate(Screen.SantriDetail.createRoute(activeSantriNis!!))
+            }
         }
         DrawerMenuItemElegant(icon = Icons.Outlined.CheckCircle, text = "Ringkasan Absensi", isEnabled = isNavEnabled) {
             closeDrawer(); navController.navigate(Screen.Absensi.createRoute(activeSantriNis!!))
@@ -1184,9 +1442,26 @@ fun DrawerBody(
             text    = "Tanya AI",
             onClick = { closeDrawer(); navController.navigate(Screen.RagChat.route) }
         )
+
+        // Tutorial Target: Phase 1 Step 2 - "Masuk ke Akun"
+        val loginMenuItemModifier = if (tutorialPhase == TutorialPhase.PHASE_1_STEP_2 && showcaseScope != null) {
+            with(showcaseScope) {
+                Modifier.showcase(
+                    index = 1,
+                    message = tutorialMsg(
+                        text = "Masuk ke Akun — Ketuk untuk masuk dengan akun wali santri Anda.",
+                        isDark = isSystemInDarkTheme()
+                    )
+                )
+            }
+        } else {
+            Modifier
+        }
+
         DrawerMenuItemElegant(
             icon    = Icons.Outlined.Login,
             text    = "Masuk ke Akun",
+            modifier = loginMenuItemModifier,
             onClick = { closeDrawer(); navController.navigate(Screen.Login.route) }
         )
     }
@@ -1249,6 +1524,15 @@ fun DrawerBody(
             }
         }
     )
+
+    // Tutorial replay button (only for wali santri)
+    if (isLoggedIn) {
+        DrawerMenuItemElegant(
+            icon    = Icons.Outlined.HelpOutline,
+            text    = "Tutorial",
+            onClick = onTutorialReplay
+        )
+    }
 
     if (isLoggedIn) {
         DrawerMenuItemElegant(
@@ -1340,6 +1624,7 @@ fun DrawerMenuItemElegant(
     icon     : ImageVector,
     text     : String,
     isEnabled: Boolean = true,
+    modifier : Modifier = Modifier,
     textColor: Color   = MaterialTheme.colorScheme.onSurface,
     iconColor: Color   = MaterialTheme.colorScheme.primary,
     onClick  : () -> Unit
@@ -1348,7 +1633,7 @@ fun DrawerMenuItemElegant(
     val containerAlpha = if (isEnabled) 0.12f else 0.05f
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 4.dp, vertical = 1.5.dp)
             .clip(RoundedCornerShape(14.dp))

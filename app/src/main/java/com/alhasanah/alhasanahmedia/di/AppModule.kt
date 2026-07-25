@@ -61,4 +61,7 @@ val appModule = module {
     single { com.alhasanah.alhasanahmedia.util.QiblaDeviceManager(androidContext()) }
     single { com.alhasanah.alhasanahmedia.util.WeatherLocationManager(androidContext()) }
     single { com.alhasanah.alhasanahmedia.util.FalakMarkazProvider(androidContext(), get()) }
+    single<AnnouncementRepository> { AnnouncementRepositoryImpl(get()) }
+    single { com.alhasanah.alhasanahmedia.util.AnnouncementPreferences(androidContext()) }
+    single { com.alhasanah.alhasanahmedia.data.repository.TutorialRepository(androidContext()) }
 }

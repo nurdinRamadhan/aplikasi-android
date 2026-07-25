@@ -68,8 +68,12 @@ import com.alhasanah.alhasanahmedia.ui.components.appPanelColor
 import com.alhasanah.alhasanahmedia.ui.components.appPanelVariantColor
 import com.alhasanah.alhasanahmedia.ui.theme.AlhasanahMediaTheme
 import com.alhasanah.alhasanahmedia.ui.theme.AmiriFontFamily
+import com.alhasanah.alhasanahmedia.ui.tutorial.TutorialPhase
+import com.alhasanah.alhasanahmedia.ui.tutorial.LocalShowcaseScope
+import com.alhasanah.alhasanahmedia.ui.tutorial.tutorialMsg
 import com.alhasanah.alhasanahmedia.util.PrayerTimeInfo
 import com.alhasanah.alhasanahmedia.util.formatRupiah
+import androidx.compose.foundation.isSystemInDarkTheme
 import org.koin.androidx.compose.koinViewModel
 import kotlin.math.cos
 import kotlin.math.sin
@@ -84,7 +88,8 @@ fun HomeContent(
     isLoggedIn: Boolean,
     openDrawer: () -> Unit,
     onNotificationClick: () -> Unit,
-    navController: NavController
+    navController: NavController,
+    tutorialPhase: TutorialPhase = TutorialPhase.NONE
 ) {
     val homeViewModel: HomeViewModel = koinViewModel()
     val authViewModel: AuthViewModel = koinViewModel()
@@ -267,6 +272,23 @@ fun HomeContent(
         }
 
         // ── Sticky Action Bar (selalu terlihat saat scroll) ─────────────
+        val showcaseScope = LocalShowcaseScope.current
+        val hamburgerShowcaseModifier = if ((tutorialPhase == TutorialPhase.PHASE_1_STEP_1 || tutorialPhase == TutorialPhase.PHASE_2_STEP_1) && showcaseScope != null) {
+            with(showcaseScope) {
+                Modifier.showcase(
+                    index = 1,
+                    message = com.alhasanah.alhasanahmedia.ui.tutorial.tutorialMsg(
+                        text = if (tutorialPhase == TutorialPhase.PHASE_1_STEP_1)
+                            "Buka Menu — Ketuk ikon ini untuk membuka navigasi drawer"
+                        else
+                            "Buka Menu — Ketuk ikon ini untuk melihat fitur wali santri",
+                        isDark = isSystemInDarkTheme()
+                    )
+                )
+            }
+        } else {
+            Modifier
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -275,7 +297,7 @@ fun HomeContent(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment     = Alignment.CenterVertically
         ) {
-            IconButton(onClick = openDrawer) {
+            IconButton(onClick = openDrawer, modifier = hamburgerShowcaseModifier) {
                 Icon(
                     imageVector       = Icons.Default.Menu,
                     contentDescription = "Menu",

@@ -198,7 +198,8 @@ sealed class Screen(val route: String) {
 fun AppNavHost(
     navController: NavHostController,
     isLoggedIn: Boolean,
-    openDrawer: () -> Unit
+    openDrawer: () -> Unit,
+    tutorialPhase: com.alhasanah.alhasanahmedia.ui.tutorial.TutorialPhase = com.alhasanah.alhasanahmedia.ui.tutorial.TutorialPhase.NONE
 ) {
     val santriActivityViewModel: SantriActivityViewModel = koinViewModel()
 
@@ -225,11 +226,12 @@ fun AppNavHost(
         composable(Screen.Splash.route) {
             SplashScreen(navController = navController)
         }
-        composable(Screen.Home.route) {
+composable(Screen.Home.route) {
             HomeScreen(
                 isLoggedIn = isLoggedIn,
                 openDrawer = openDrawer,
-                navController = navController
+                navController = navController,
+                tutorialPhase = tutorialPhase
             )
         }
         composable(
@@ -253,7 +255,10 @@ fun AppNavHost(
             NotificationScreen(navController = navController)
         }
         composable(Screen.Login.route) {
-            LoginScreen(navController = navController)
+            LoginScreen(
+                navController = navController,
+                tutorialPhase = tutorialPhase
+            )
         }
         composable(Screen.BeritaList.route) {
             com.alhasanah.alhasanahmedia.ui.berita.BeritaListScreen(navController = navController)

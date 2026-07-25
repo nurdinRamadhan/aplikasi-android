@@ -66,6 +66,9 @@ import androidx.navigation.NavController
 import com.alhasanah.alhasanahmedia.R
 import com.alhasanah.alhasanahmedia.navigation.Screen
 import com.alhasanah.alhasanahmedia.ui.components.AppSolidBackground
+import com.alhasanah.alhasanahmedia.ui.tutorial.TutorialPhase
+import com.alhasanah.alhasanahmedia.ui.tutorial.tutorialMsg
+import com.alhasanah.alhasanahmedia.ui.tutorial.LocalShowcaseScope
 import com.alhasanah.alhasanahmedia.util.isAppInDarkTheme
 import org.koin.androidx.compose.koinViewModel
 
@@ -73,6 +76,7 @@ import org.koin.androidx.compose.koinViewModel
 fun LoginScreen(
     navController: NavController,
     authViewModel: AuthViewModel = koinViewModel(),
+    tutorialPhase: TutorialPhase = TutorialPhase.NONE,
 ) {
     val loginState by authViewModel.loginState.collectAsState()
     var email by remember { mutableStateOf("") }
@@ -90,6 +94,37 @@ fun LoginScreen(
             }
         }
     }
+
+    LoginScreenContent(
+        navController = navController,
+        authViewModel = authViewModel,
+        tutorialPhase = tutorialPhase,
+        isDark = isDark,
+        email = email,
+        onEmailChange = { email = it },
+        password = password,
+        onPasswordChange = { password = it },
+        passwordVisible = passwordVisible,
+        onPasswordToggle = { passwordVisible = !passwordVisible },
+        loginState = loginState
+    )
+}
+
+@Composable
+private fun LoginScreenContent(
+    navController: NavController,
+    authViewModel: AuthViewModel,
+    tutorialPhase: TutorialPhase,
+    isDark: Boolean,
+    email: String,
+    onEmailChange: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    passwordVisible: Boolean,
+    onPasswordToggle: () -> Unit,
+    loginState: LoginState
+) {
+    val primaryColor = MaterialTheme.colorScheme.primary
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -181,22 +216,40 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                LoginTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = "Alamat Email",
-                    icon = Icons.Default.Email,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-                )
+                // Tutorial Target: Phase 1 Step 3 - Email field
+                val showcaseScope = LocalShowcaseScope.current
+                val emailFieldModifier = if (tutorialPhase == TutorialPhase.PHASE_1_STEP_3 && showcaseScope != null) {
+                    with(showcaseScope) {
+                        Modifier.showcase(
+                            index = 1,
+                            message = tutorialMsg(
+                                text = "Masukkan Email — Masukkan alamat email yang terdaftar, lalu ketuk Masuk.",
+                                isDark = isDark
+                            )
+                        )
+                    }
+                } else {
+                    Modifier
+                }
+
+                Box(modifier = emailFieldModifier) {
+                    LoginTextField(
+                        value = email,
+                        onValueChange = { onEmailChange(it) },
+                        label = "Alamat Email",
+                        icon = Icons.Default.Email,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                    )
+                }
 
                 LoginTextField(
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = { onPasswordChange(it) },
                     label = "Kata Sandi",
                     icon = Icons.Default.Lock,
                     isPassword = true,
                     passwordVisible = passwordVisible,
-                    onPasswordToggle = { passwordVisible = !passwordVisible },
+                    onPasswordToggle = { onPasswordToggle() },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
                 )
 
