@@ -214,3 +214,19 @@ data class TagihanWithDetail(
         val tipe: String
     )
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Cache Metadata — Offline-first dengan TTL forever + stale detection
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Serializable
+data class TagihanCache(
+    val items: List<TagihanWithDetail>,
+    val cachedAt: Long = System.currentTimeMillis(),
+    val serverSyncedAt: Long? = null,
+    val etag: String? = null
+) {
+    /** True jika data sudah tidak sync ke server > 5 menit */
+    val isStale: Boolean
+        get() = serverSyncedAt != null && (System.currentTimeMillis() - serverSyncedAt!!) > 5 * 60 * 1000
+}

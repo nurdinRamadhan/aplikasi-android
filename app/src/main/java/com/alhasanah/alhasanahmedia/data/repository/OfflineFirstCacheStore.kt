@@ -20,6 +20,7 @@ import com.alhasanah.alhasanahmedia.data.model.PelanggaranSantri
 import com.alhasanah.alhasanahmedia.data.model.PerizinanSantri
 import com.alhasanah.alhasanahmedia.data.model.RingkasanAbsensiMingguan
 import com.alhasanah.alhasanahmedia.data.model.SantriModel
+import com.alhasanah.alhasanahmedia.data.model.TagihanCache
 import com.alhasanah.alhasanahmedia.data.model.TagihanWithDetail
 import com.alhasanah.alhasanahmedia.data.model.devotion.DevotionLibraryData
 import com.alhasanah.alhasanahmedia.data.model.devotion.KitabChapter
@@ -129,11 +130,17 @@ class OfflineFirstCacheStore(
         )
     }
 
-    suspend fun getTagihan(nis: String): List<TagihanWithDetail>? =
-        readList(key("tagihan", nis), TagihanWithDetail.serializer())
+    suspend fun getTagihan(nis: String): TagihanCache? =
+        readCached(key("tagihan", nis), TagihanCache.serializer())?.value
 
-    suspend fun saveTagihan(nis: String, items: List<TagihanWithDetail>) {
-        writeList(key("tagihan", nis), "tagihan", TagihanWithDetail.serializer(), items)
+    suspend fun saveTagihan(nis: String, cache: TagihanCache) {
+        write(
+            key = key("tagihan", nis),
+            domain = "tagihan",
+            serializer = TagihanCache.serializer(),
+            value = cache,
+            expiresAt = null // TTL forever — data riwayat tidak expire
+        )
     }
 
     suspend fun getPrayerLocations(keyword: String): CachedValue<List<PrayerLocation>>? =
@@ -426,6 +433,7 @@ class OfflineFirstCacheStore(
         val CALENDAR_TTL_MILLIS: Long = TimeUnit.HOURS.toMillis(36)
         val HOLIDAY_TTL_MILLIS: Long = TimeUnit.DAYS.toMillis(30)
         val AbsensiCacheTTL: Long = TimeUnit.DAYS.toMillis(7)
+        val TAGIHAN_CACHE_TTL: Long = TimeUnit.HOURS.toMillis(1) // 1 hour
     }
 }
 

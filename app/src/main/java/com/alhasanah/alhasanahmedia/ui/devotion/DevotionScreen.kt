@@ -658,11 +658,11 @@ private fun DevotionCard(item: DevotionItem) {
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(item.title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(item.title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 Pill(item.category)
             }
             if (item.arabic.isNotBlank()) {
-                Text(item.arabic, modifier = Modifier.fillMaxWidth(), fontFamily = AmiriFontFamily, fontSize = 25.sp, lineHeight = 38.sp, textAlign = TextAlign.End)
+                Text(item.arabic, modifier = Modifier.fillMaxWidth(), fontFamily = AmiriFontFamily, fontSize = 25.sp, lineHeight = 38.sp, textAlign = TextAlign.End, color = MaterialTheme.colorScheme.onSurface)
             }
             if (item.latin.isNotBlank()) Text(item.latin, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
             if (item.translation.isNotBlank()) Text(item.translation, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -703,7 +703,7 @@ private fun KitabBookCard(book: KitabBook, onClick: () -> Unit) {
         Row(modifier = Modifier.padding(14.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             IconCircle(Icons.Default.Book, "Buka kitab", onClick)
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(book.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(book.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 if (book.author.isNotBlank()) Text(book.author, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                     if (book.category.isNotBlank()) Pill(book.category)
@@ -726,7 +726,7 @@ private fun SelectedBookHeader(book: KitabBook, onBack: () -> Unit) {
         Row(modifier = Modifier.padding(14.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             IconCircle(Icons.AutoMirrored.Filled.ArrowBack, "Daftar kitab", onBack)
             Column(modifier = Modifier.weight(1f)) {
-                Text(book.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(book.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 Text(book.author.ifBlank { book.category }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
@@ -754,12 +754,12 @@ private fun KitabChapterCard(
                 Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)) {
                     Text(chapter.number.toString(), modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
-                Text(chapter.title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                Text(chapter.title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             }
             AnimatedVisibility(visible = expanded) {
                 val detail = selectedChapter ?: chapter
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    if (detail.arabic.isNotBlank()) Text(detail.arabic, modifier = Modifier.fillMaxWidth(), fontFamily = AmiriFontFamily, fontSize = 24.sp, lineHeight = 36.sp, textAlign = TextAlign.End)
+                    if (detail.arabic.isNotBlank()) Text(detail.arabic, modifier = Modifier.fillMaxWidth(), fontFamily = AmiriFontFamily, fontSize = 24.sp, lineHeight = 36.sp, textAlign = TextAlign.End, color = MaterialTheme.colorScheme.onSurface)
                     if (detail.content.isNotBlank()) Text(detail.content, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     if (detail.translation.isNotBlank()) Text(detail.translation, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     if (detail.latin.isNotBlank()) Text(detail.latin, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)

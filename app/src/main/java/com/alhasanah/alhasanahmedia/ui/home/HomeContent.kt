@@ -207,7 +207,8 @@ fun HomeContent(
                         isDark = useDarkTheme,
                         onFeatureClick = { featureName ->
                             if (featureName.contains("Tanya")) {
-                                navController.navigate(Screen.RagChat.route)
+                                comingSoonTitle = "Tanya AI"
+                                showComingSoonDialog = true
                             } else if (featureName.contains("Al-Quran")) {
                                 navController.navigate(Screen.Quran.route)
                             } else if (featureName.contains("Hadist")) {
@@ -1098,7 +1099,7 @@ private fun MiniExpenseChart(
         Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Column {
-                    Text(title, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                    Text(title, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     Text("Total ${formatRupiah(total)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Icon(Icons.Default.BarChart, contentDescription = null, tint = primary)
@@ -1114,7 +1115,7 @@ private fun MiniExpenseChart(
                 Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(item.label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(formatRupiah(item.amount), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                        Text(formatRupiah(item.amount), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     }
                     Box(
                         modifier = Modifier

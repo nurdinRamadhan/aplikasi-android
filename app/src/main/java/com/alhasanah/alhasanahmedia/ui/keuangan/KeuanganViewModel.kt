@@ -11,6 +11,7 @@ import com.alhasanah.alhasanahmedia.data.model.CorePaymentResponse
 import com.alhasanah.alhasanahmedia.data.model.CustomerDetails
 import com.alhasanah.alhasanahmedia.data.model.ItemDetail
 import com.alhasanah.alhasanahmedia.data.model.PembayaranTagihanDto
+import com.alhasanah.alhasanahmedia.data.model.TagihanCache
 import com.alhasanah.alhasanahmedia.data.model.TagihanDto
 import com.alhasanah.alhasanahmedia.data.model.TagihanStatus
 import com.alhasanah.alhasanahmedia.data.model.TagihanWithDetail
@@ -47,10 +48,11 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlin.collections.emptyList
 
 sealed interface TagihanUiState {
     data object Loading : TagihanUiState
-    data class Success(val tagihan: List<TagihanWithDetail>) : TagihanUiState
+    data class Success(val cache: TagihanCache) : TagihanUiState
     data class Error(val message: String) : TagihanUiState
 }
 
@@ -138,9 +140,11 @@ class KeuanganViewModel(
         viewModelScope.launch {
             _tagihanState.value = TagihanUiState.Loading
             
-            if (isPublicDonation) {
+if (isPublicDonation) {
                 // Untuk akses publik (Donasi), jangan tampilkan error, cukup set success kosong
-                _tagihanState.value = TagihanUiState.Success(emptyList())
+                _tagihanState.value = TagihanUiState.Success(
+                    TagihanCache(items = emptyList())
+                )
                 _santriInfoState.value = SantriInfoState.Error("Akses Publik") // Diabaikan oleh DonasiScreen
                 return@launch
             }
@@ -170,11 +174,11 @@ class KeuanganViewModel(
         }
     }
     
-    private fun loadTagihan(nis: String) {
+private fun loadTagihan(nis: String) {
         viewModelScope.launch {
             keuanganRepository.getTagihanByNis(nis)
                 .catch { e -> _tagihanState.value = TagihanUiState.Error(e.message ?: "Gagal memuat tagihan") }
-                .collect { tagihanList -> _tagihanState.value = TagihanUiState.Success(tagihanList) }
+                .collect { cache -> _tagihanState.value = TagihanUiState.Success(cache) }
         }
     }
 
@@ -333,9 +337,11 @@ class KeuanganViewModel(
 
                 Log.d("KeuanganViewModel", "Response donasi diterima")
 
-                if (response.data != null) {
+if (response.data != null) {
                     _launchCorePayment.emit(response.data)
-                    _tagihanState.value = TagihanUiState.Success(emptyList()) 
+                    _tagihanState.value = TagihanUiState.Success(
+                        TagihanCache(items = emptyList())
+                    )
                 } else {
                     // Coba ambil detail error jika ada
                     val midtransError = response.details?.error_messages?.joinToString()

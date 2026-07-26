@@ -16,7 +16,9 @@ data class HafalanTahfidz(
     val total_hafalan: Int? = null,
     val hafalan_kitab: String? = null,
     val juz: Int? = null,
-    val predikat: String? = null
+    val predikat: String? = null,
+    val detail_hafalan: String? = null,
+    val penyimak: String? = null
 )
 
 @Serializable
@@ -34,7 +36,9 @@ data class MurojaahTahfidz(
     val status: String? = null,
     val predikat: String? = null,
     val catatan: String? = null,
-    val dicatat_oleh_id: String? = null
+    val dicatat_oleh_id: String? = null,
+    val detail_hafalan: String? = null,
+    val penyimak: String? = null
 )
 
 @Serializable

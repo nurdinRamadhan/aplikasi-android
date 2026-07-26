@@ -192,6 +192,7 @@ sealed class Screen(val route: String) {
     object JuzDetail : Screen("juz_detail/{nomor}") {
         fun createRoute(nomor: Int) = "juz_detail/$nomor"
     }
+    object TentangKami : Screen("tentang_kami")
 }
 
 @Composable
@@ -663,6 +664,11 @@ composable(Screen.Home.route) {
                         popUpTo(Screen.Home.route) { inclusive = true }
                     }
                 }
+            )
+        }
+        composable(Screen.TentangKami.route) {
+            com.alhasanah.alhasanahmedia.ui.about.TentangKamiScreen(
+                onBack = { navController.popBackStack() }
             )
         }
     }

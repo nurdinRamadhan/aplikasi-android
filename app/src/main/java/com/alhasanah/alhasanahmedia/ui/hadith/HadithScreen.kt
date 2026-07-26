@@ -629,7 +629,7 @@ private fun HadithLibraryIntro() {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Icon(Icons.Default.ViewModule, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                Text("Rak Hadis", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text("Rak Hadis", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             }
             Text(
                 text = "Pilih kelompok nomor atau topik terlebih dahulu. Data disusun dari Ensiklopedia Hadis API Muslim dan tetap mendukung cache offline.",
@@ -835,7 +835,8 @@ private fun HadithCardHeader(id: Int, grade: String?) {
             Text(
                 text = "Hadis #$id",
                 style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
         grade?.takeIf { it.isNotBlank() }?.let {

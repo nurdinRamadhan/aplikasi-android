@@ -104,6 +104,7 @@ import com.alhasanah.alhasanahmedia.data.model.CorePaymentMethod
 import com.alhasanah.alhasanahmedia.navigation.Screen
 import com.alhasanah.alhasanahmedia.ui.components.AppPageHeaderBackground
 import com.alhasanah.alhasanahmedia.ui.components.AppSolidBackground
+import com.alhasanah.alhasanahmedia.ui.components.ComingSoonDialog
 import com.alhasanah.alhasanahmedia.ui.keuangan.KeuanganViewModel
 import com.alhasanah.alhasanahmedia.ui.keuangan.SantriInfoState
 import com.alhasanah.alhasanahmedia.ui.keuangan.TagihanUiState
@@ -340,6 +341,7 @@ private fun DonasiContent(
     var isAnonymous  by remember { mutableStateOf(false) }
     var selectedPreset by remember { mutableStateOf<Long?>(null) }
     var showPaymentMethodDialog by remember { mutableStateOf(false) }
+    var showComingSoonDialog by remember { mutableStateOf(false) }
 
     val isDark   = isAppInDarkTheme()
     val primary  = MaterialTheme.colorScheme.primary
@@ -586,7 +588,7 @@ private fun DonasiContent(
                 nominal   = nominal,
                 isDark    = isDark,
                 onClick   = {
-                    showPaymentMethodDialog = true
+                    showComingSoonDialog = true
                 }
             )
 
@@ -618,6 +620,13 @@ private fun DonasiContent(
                 CorePaymentMethod.ALFAMART,
                 CorePaymentMethod.INDOMARET
             )
+        )
+    }
+
+    if (showComingSoonDialog) {
+        ComingSoonDialog(
+            title = "Pembayaran Donasi",
+            onDismiss = { showComingSoonDialog = false }
         )
     }
 }
@@ -1437,6 +1446,7 @@ fun DonasiSuccessDialog(
     
     // Confetti particles simulation
     val particles = remember { List(15) { (0..360).random() } }
+
     val particleOffset by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,

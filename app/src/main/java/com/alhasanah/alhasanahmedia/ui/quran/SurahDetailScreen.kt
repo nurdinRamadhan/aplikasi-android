@@ -49,6 +49,7 @@ import com.alhasanah.alhasanahmedia.data.model.quran.TafsirItem
 import com.alhasanah.alhasanahmedia.ui.components.AppGradientBackground
 import com.alhasanah.alhasanahmedia.ui.components.AppPageHeaderBackground
 import com.alhasanah.alhasanahmedia.ui.theme.AmiriFontFamily
+import com.alhasanah.alhasanahmedia.util.isAppInDarkTheme
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.math.PI
@@ -66,6 +67,13 @@ private val GoldDeep     = Color(0xFFAA7C1F)   // Deep gold (on light bg)
 private val GoldShimmer  = Color(0xFFFAF0C0)   // Very light gold tint (light mode)
 private val GoldMuted    = Color(0xFFF5E6A3)   // Muted gold tint
 
+private val PureWhite        = Color(0xFFFFFFFF)
+private val TextPrimary      = Color(0xFF1C1C1E)
+private val TextSecondary    = Color(0xFF6B6B6B)
+private val PlayingTint      = Color(0xFFFFF8E1)
+private val DarkCardSurface  = Color(0xFF1C1810)
+private val DarkCardPlaying  = Color(0xFF231A06)
+
 // Gradients — Gold brand identity (unchanged)
 private val GoldGradient = Brush.linearGradient(
     colors = listOf(GoldDeep, GoldPrimary, GoldLight, GoldPrimary, GoldDeep)
@@ -73,7 +81,7 @@ private val GoldGradient = Brush.linearGradient(
 
 // Header Card — intentionally dark both light & dark mode (luxury mushaf aesthetic)
 // Light:  warm dark (#12100A) — not cold black
-// Adapted per composable using isSystemInDarkTheme()
+// Adapted per composable using isAppInDarkTheme()
 private val HeaderGradientLight = Brush.verticalGradient(
     colors = listOf(Color(0xFF12100A), Color(0xFF1E1A0F))
 )
@@ -107,7 +115,7 @@ fun SurahDetailScreen(
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        AppGradientBackground(isDark = isSystemInDarkTheme())
+        AppGradientBackground(isDark = isAppInDarkTheme())
 
         when (val state = uiState) {
             is QuranUiState.Loading -> {
@@ -214,7 +222,7 @@ private fun QuranPageBackground() {
 
 @Composable
 private fun LuxuryDetailTopBar(surah: SurahDetail, onBack: () -> Unit) {
-    val isDark  = isSystemInDarkTheme()
+    val isDark  = isAppInDarkTheme()
     val primary = MaterialTheme.colorScheme.primary
 
     val headerBrush = if (isDark) {
@@ -372,7 +380,7 @@ fun SurahHeaderCard(
     onQoriSelected: (String) -> Unit,
     onPlayFullClick: () -> Unit
 ) {
-    val isDark         = isSystemInDarkTheme()
+    val isDark         = isAppInDarkTheme()
     val headerGradient = if (isDark) HeaderGradientDark else HeaderGradientLight
 
     val interactionSource = remember { MutableInteractionSource() }
@@ -772,7 +780,7 @@ private fun NowPlayingPulse() {
 
 @Composable
 private fun BismillahBanner() {
-    val isDark  = isSystemInDarkTheme()
+    val isDark  = isAppInDarkTheme()
     val primary = MaterialTheme.colorScheme.primary
 
     // Breathing glow animation
@@ -879,14 +887,16 @@ fun AyatItem(
     onTafsirClick: () -> Unit,
     onBookmarkClick: () -> Unit
 ) {
-    val isDark  = isSystemInDarkTheme()
+    val isDark  = isAppInDarkTheme()
 
     // ── Theme-adaptive playing/idle colors ────────────────────────────────
-    val idleCardColor    = MaterialTheme.colorScheme.surface
-    val playingCardColor = if (isDark) Color(0xFF1F1800) else Color(0xFFFFF8E1)
-
     val cardColor by animateColorAsState(
-        targetValue   = if (isPlaying) playingCardColor else idleCardColor,
+        targetValue   = when {
+            isPlaying && isDark  -> DarkCardPlaying
+            isPlaying            -> PlayingTint
+            isDark               -> DarkCardSurface
+            else                 -> PureWhite
+        },
         animationSpec = spring(stiffness = Spring.StiffnessLow),
         label         = "card_color"
     )
@@ -900,8 +910,8 @@ fun AyatItem(
         targetValue   = when {
             isPlaying && isDark  -> GoldLight
             isPlaying && !isDark -> GoldDeep
-            isDark               -> MaterialTheme.colorScheme.onSurface
-            else                 -> Color(0xFF1C1C1E)
+            isDark               -> Color.White.copy(alpha = 0.88f)
+            else                 -> TextPrimary
         },
         label = "arabic_color"
     )
@@ -1037,7 +1047,10 @@ fun AyatItem(
                 text       = ayah.translation,
                 fontSize   = 13.sp,
                 lineHeight = 22.sp,
-                color      = MaterialTheme.colorScheme.onSurfaceVariant,
+                color      = if (isDark)
+                    Color.White.copy(alpha = 0.52f)
+                else
+                    TextSecondary,
                 modifier   = Modifier.fillMaxWidth()
             )
 
@@ -1204,7 +1217,7 @@ private fun PlayActionButton(isPlaying: Boolean, isDark: Boolean, onClick: () ->
 
 @Composable
 private fun LuxuryDetailLoading() {
-    val isDark  = isSystemInDarkTheme()
+    val isDark  = isAppInDarkTheme()
     val primary = MaterialTheme.colorScheme.primary
 
     // Rotating spinner ornament

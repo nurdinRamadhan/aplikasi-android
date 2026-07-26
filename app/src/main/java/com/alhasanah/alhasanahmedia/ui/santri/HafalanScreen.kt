@@ -956,9 +956,23 @@ fun LastSetoranCard(
                     )
                 }
 
+                HafalanInfoPanel(
+                    label = "Detail Hafalan",
+                    value = hafalan.detail_hafalan,
+                    icon = Icons.Outlined.MenuBook,
+                    modifier = Modifier.padding(top = 10.dp)
+                )
+
+                HafalanInfoPanel(
+                    label = "Penyimak",
+                    value = hafalan.penyimak,
+                    icon = Icons.Outlined.Person,
+                    modifier = Modifier.padding(top = 6.dp)
+                )
+
                 HafalanCatatanPanel(
                     catatan = hafalan.catatan,
-                    modifier = Modifier.padding(top = 12.dp)
+                    modifier = Modifier.padding(top = 10.dp)
                 )
             }
         }
@@ -1167,10 +1181,24 @@ fun HafalanSetoranCard(
                     }
                 }
 
+                HafalanInfoPanel(
+                    label = "Detail Hafalan",
+                    value = hafalan.detail_hafalan,
+                    icon = Icons.Outlined.MenuBook,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+
+                HafalanInfoPanel(
+                    label = "Penyimak",
+                    value = hafalan.penyimak,
+                    icon = Icons.Outlined.Person,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+
                 HafalanCatatanPanel(
                     catatan = hafalan.catatan,
                     compact = true,
-                    modifier = Modifier.padding(top = 10.dp)
+                    modifier = Modifier.padding(top = 8.dp)
                 )
             }
         }
@@ -1251,6 +1279,67 @@ private fun HafalanCatatanPanel(
                 maxLines = if (expanded) Int.MAX_VALUE else if (compact) 1 else 2,
                 overflow = TextOverflow.Ellipsis
             )
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HafalanInfoPanel — Detail Hafalan / Penyimak (simple, no expand)
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun HafalanInfoPanel(
+    label: String,
+    value: String?,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    modifier: Modifier = Modifier
+) {
+    val text = value?.trim()?.takeIf { it.isNotBlank() } ?: return
+    val primary = MaterialTheme.colorScheme.primary
+
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = primary.copy(alpha = if (isAppInDarkTheme()) 0.08f else 0.06f),
+        border = androidx.compose.foundation.BorderStroke(
+            0.5.dp,
+            primary.copy(alpha = if (isAppInDarkTheme()) 0.18f else 0.14f)
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = primary,
+                modifier = Modifier.size(14.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 9.sp,
+                        letterSpacing = 0.4.sp
+                    ),
+                    maxLines = 1
+                )
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Medium,
+                        lineHeight = 18.sp,
+                        fontSize = 11.sp
+                    ),
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }

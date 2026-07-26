@@ -39,16 +39,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Payment
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Badge
 import androidx.compose.material.icons.outlined.CalendarToday
@@ -65,6 +67,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -88,6 +91,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -101,12 +105,14 @@ import androidx.navigation.NavController
 import com.alhasanah.alhasanahmedia.data.model.CorePaymentData
 import com.alhasanah.alhasanahmedia.data.model.CorePaymentMethod
 import com.alhasanah.alhasanahmedia.data.model.PembayaranTagihanDto
+import com.alhasanah.alhasanahmedia.data.model.TagihanCache
 import com.alhasanah.alhasanahmedia.data.model.TagihanStatus
 import com.alhasanah.alhasanahmedia.data.model.TagihanWithDetail
 import com.alhasanah.alhasanahmedia.navigation.Screen
+import com.alhasanah.alhasanahmedia.ui.components.AppPageHeaderBackground
+import com.alhasanah.alhasanahmedia.ui.components.ComingSoonDialog
 import com.alhasanah.alhasanahmedia.ui.payment.PaymentInstructionData
 import com.alhasanah.alhasanahmedia.ui.payment.PaymentMethodPickerDialog
-import com.alhasanah.alhasanahmedia.ui.components.AppPageHeaderBackground
 import com.alhasanah.alhasanahmedia.util.formatDate
 import com.alhasanah.alhasanahmedia.util.formatRupiah
 import com.alhasanah.alhasanahmedia.util.isAppInDarkTheme
@@ -234,9 +240,9 @@ fun KeuanganScreen(
                         }
 
                     // Count badge
-                    if (tagihanState is TagihanUiState.Success) {
-                        val count = (tagihanState as TagihanUiState.Success)
-                            .tagihan.count { it.matchesFilter(activeFilter) }
+                    val tagihanSuccess = tagihanState as? TagihanUiState.Success
+                    if (tagihanSuccess != null) {
+                        val count = tagihanSuccess.cache.items.count { it.matchesFilter(activeFilter) }
                         Surface(
                             shape = CircleShape,
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
@@ -272,13 +278,22 @@ fun KeuanganScreen(
                     }
                 }
                 is TagihanUiState.Success -> {
-                    val filtered = state.tagihan.filter { it.matchesFilter(activeFilter) }
+                    val cache = state.cache
+                    val filtered = cache.items.filter { it.matchesFilter(activeFilter) }
                     val lastPaymentsByTagihan = (riwayatPembayaranState as? RiwayatPembayaranUiState.Success)
                         ?.items
                         ?.filter { it.status.equals("posted", ignoreCase = true) }
                         ?.groupBy { it.tagihanId }
                         ?.mapValues { (_, payments) -> payments.firstOrNull() }
                         .orEmpty()
+
+                    // Stale indicator
+                    if (cache.isStale) {
+                        item {
+                            StaleIndicator(cache)
+                        }
+                    }
+
                     if (filtered.isEmpty()) {
                         item { FinanceEmptyState(filter = activeFilter) }
                     } else {
@@ -293,13 +308,34 @@ fun KeuanganScreen(
                                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 7.dp),
                                     onClick  = { showDetailSheet = tagihan }
                                 )
-                            }
-                        }
                     }
+
+                    // Refresh button
+                    IconButton(onClick = { viewModel.refreshData() }) {
+                        val rotation by animateFloatAsState(
+                            targetValue = if (tagihanState is TagihanUiState.Loading) 360f else 0f,
+                            animationSpec = if (tagihanState is TagihanUiState.Loading) {
+                                infiniteRepeatable(animation = tween(1000, easing = LinearEasing))
+                            } else {
+                                tween(durationMillis = 300)
+                            },
+                            label = "refreshRotation"
+                        )
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = "Refresh",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .size(20.dp)
+                                .graphicsLayer { rotationZ = rotation }
+                        )
+                    }
+                }
+            }
                     item {
                         GlobalPaymentHistorySection(
                             riwayatState = riwayatPembayaranState,
-                            tagihanById = state.tagihan.associateBy { it.id },
+                            tagihanById = state.cache.items.associateBy { it.id },
                             modifier = Modifier.padding(horizontal = 24.dp, vertical = 18.dp)
                         )
                     }
@@ -657,8 +693,9 @@ fun FinancialSummaryCard(
     // Compute financial aggregates from tagihan
     val (totalTagihan, totalTerbayar, sisaTotal) = remember(tagihanState) {
         if (tagihanState is TagihanUiState.Success) {
-            val total    = tagihanState.tagihan.sumOf { it.nominalTagihan ?: 0L }
-            val sisa     = tagihanState.tagihan
+            val items = tagihanState.cache.items
+            val total    = items.sumOf { it.nominalTagihan ?: 0L }
+            val sisa     = items
                 .filter { it.status != TagihanStatus.LUNAS }
                 .sumOf { it.sisaTagihan ?: 0L }
             val terbayar = total - sisa
@@ -967,6 +1004,60 @@ fun FilterChipRow(
                 }
             }
         }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Stale Indicator — Shows when data is from cache and not recently synced
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+fun StaleIndicator(cache: TagihanCache?) {
+    val isStale = cache?.isStale == true
+    if (!isStale) return
+
+    val syncedAt = cache?.serverSyncedAt
+    val timeAgo = syncedAt?.let { System.currentTimeMillis() - it }
+    val label = when {
+        timeAgo == null -> "Data offline"
+        timeAgo < 60_000 -> "Data offline • Baru saja"
+        timeAgo < 3_600_000 -> "Data offline • ${(timeAgo / 60_000)} menit lalu"
+        timeAgo < 86_400_000 -> "Data offline • ${(timeAgo / 3_600_000)} jam lalu"
+        else -> "Data offline • ${(timeAgo / 86_400_000)} hari lalu"
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 8.dp)
+            .background(
+                brush = androidx.compose.ui.graphics.Brush.horizontalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
+                        MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.1f)
+                    )
+                ),
+                shape = RoundedCornerShape(12.dp)
+            )
+            .padding(12.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(    imageVector = Icons.Filled.Info,
+                 contentDescription = "Info",
+                 modifier = Modifier.size(16.dp),
+                 tint = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall.copy(
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                fontWeight = FontWeight.Medium
+            )
+        )
     }
 }
 
@@ -1296,6 +1387,7 @@ fun TagihanDetailSheet(
 ) {
     val isLunas  = tagihan.status == TagihanStatus.LUNAS
     val isCicilan = tagihan.status == TagihanStatus.CICILAN
+    var showComingSoonDialog by remember { mutableStateOf(false) }
     val terbayar = (tagihan.nominalTagihan ?: 0L) - (tagihan.sisaTagihan ?: 0L)
     val progress = if ((tagihan.nominalTagihan ?: 0L) > 0)
         (terbayar.toFloat() / (tagihan.nominalTagihan ?: 0L).toFloat()).coerceIn(0f, 1f)
@@ -1615,7 +1707,7 @@ fun TagihanDetailSheet(
                     .clickable(
                         interactionSource = interactionSource,
                         indication        = null
-                    ) { onBayarClick(tagihan) },
+                    ) { showComingSoonDialog = true },
                 contentAlignment = Alignment.Center
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1649,6 +1741,13 @@ fun TagihanDetailSheet(
                 modifier  = Modifier.fillMaxWidth()
             )
         }
+    }
+
+    if (showComingSoonDialog) {
+        ComingSoonDialog(
+            title = "Pembayaran Tagihan",
+            onDismiss = { showComingSoonDialog = false }
+        )
     }
 }
 

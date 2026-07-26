@@ -1354,7 +1354,11 @@ fun DrawerBody(
         DrawerMenuItemElegant(
             icon    = Icons.Outlined.AutoAwesome,
             text    = "Tanya AI",
-            onClick = { closeDrawer(); navController.navigate(Screen.RagChat.route) }
+            onClick = {
+                closeDrawer()
+                comingSoonTitle = "Tanya AI"
+                showComingSoonDialog = true
+            }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -1407,9 +1411,6 @@ fun DrawerBody(
         DrawerMenuItemElegant(icon = Icons.Outlined.AutoStories, text = "Murojaah Hafalan", isEnabled = isNavEnabled) {
             closeDrawer(); navController.navigate(Screen.Murajaah.createRoute(activeSantriNis!!))
         }
-        DrawerMenuItemElegant(icon = Icons.Outlined.LibraryBooks, text = "Hafalan Kitab", isEnabled = isNavEnabled) {
-            closeDrawer(); navController.navigate(Screen.HafalanKitab.createRoute(activeSantriNis!!))
-        }
         DrawerMenuItemElegant(icon = Icons.Outlined.ReportProblem, text = "Catatan Kedisiplinan", isEnabled = isNavEnabled) {
             closeDrawer(); navController.navigate(Screen.Pelanggaran.createRoute(activeSantriNis!!))
         }
@@ -1440,7 +1441,11 @@ fun DrawerBody(
         DrawerMenuItemElegant(
             icon    = Icons.Outlined.AutoAwesome,
             text    = "Tanya AI",
-            onClick = { closeDrawer(); navController.navigate(Screen.RagChat.route) }
+            onClick = {
+                closeDrawer()
+                comingSoonTitle = "Tanya AI"
+                showComingSoonDialog = true
+            }
         )
 
         // Tutorial Target: Phase 1 Step 2 - "Masuk ke Akun"
@@ -1525,14 +1530,11 @@ fun DrawerBody(
         }
     )
 
-    // Tutorial replay button (only for wali santri)
-    if (isLoggedIn) {
-        DrawerMenuItemElegant(
-            icon    = Icons.Outlined.HelpOutline,
-            text    = "Tutorial",
-            onClick = onTutorialReplay
-        )
-    }
+    DrawerMenuItemElegant(
+        icon    = Icons.Outlined.Info,
+        text    = "Tentang Kami",
+        onClick = { closeDrawer(); navController.navigate(Screen.TentangKami.route) }
+    )
 
     if (isLoggedIn) {
         DrawerMenuItemElegant(

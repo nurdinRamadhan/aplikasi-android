@@ -184,11 +184,11 @@ class HomeViewModel(
     private suspend fun <T> loadFirstOrEmpty(block: suspend () -> List<T>): List<T> =
         withTimeoutOrNull(6_000) { runCatching { block() }.getOrDefault(emptyList()) }.orEmpty()
 
-    private suspend fun loadLatestTagihanOrEmpty(nis: String): List<TagihanWithDetail> =
+private suspend fun loadLatestTagihanOrEmpty(nis: String): List<TagihanWithDetail> =
         withTimeoutOrNull(6_000) {
             runCatching {
                 var latest = emptyList<TagihanWithDetail>()
-                keuanganRepository.getTagihanByNis(nis).collect { latest = it }
+                keuanganRepository.getTagihanByNis(nis).collect { latest = it.items }
                 latest
             }.getOrDefault(emptyList())
         }.orEmpty()

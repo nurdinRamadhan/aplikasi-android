@@ -1,13 +1,13 @@
 package com.alhasanah.alhasanahmedia.data.repository
 
 import com.alhasanah.alhasanahmedia.data.model.PembayaranTagihanDto
-import com.alhasanah.alhasanahmedia.data.model.TagihanWithDetail
+import com.alhasanah.alhasanahmedia.data.model.TagihanCache
 import com.alhasanah.alhasanahmedia.data.model.TransaksiDto
 import kotlinx.coroutines.flow.Flow
 
 interface KeuanganRepository {
 
-    fun getTagihanByNis(nis: String): Flow<List<TagihanWithDetail>>
+    fun getTagihanByNis(nis: String): Flow<TagihanCache>
 
     suspend fun getPembayaranTagihan(tagihanId: String): List<PembayaranTagihanDto>
 
