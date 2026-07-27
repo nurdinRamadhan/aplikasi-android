@@ -46,7 +46,7 @@ private val LightPaper = Color(0xFFFDF9F3)
 
 // ── Contact data ───────────────────────────────────────────────────────────
 private const val DEV_EMAIL     = "nurdincrs123@gmail.com"
-private const val DEV_WHATSAPP  = "081804886112"
+private const val DEV_WHATSAPP  = "0882000979741"
 private const val WA_MESSAGE    = "Halo, saya ingin bertanya tentang aplikasi Al-Hasanah Media."
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -504,7 +504,7 @@ private fun TentangKamiBody(isDark: Boolean) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ██  CONTACT DEVELOPER — Elegant card
+// ██  BANTUAN & DUKUNGAN — Prominent cards with shadow/glow contrast
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun ContactDeveloper(
@@ -516,12 +516,13 @@ private fun ContactDeveloper(
         modifier            = Modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         // Section label
         Row(
             verticalAlignment     = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier             = Modifier.padding(bottom = 4.dp)
         ) {
             Box(
                 modifier = Modifier
@@ -533,7 +534,7 @@ private fun ContactDeveloper(
                     )
             )
             Text(
-                text  = "HUBUNGI DEVELOPER",
+                text  = "BANTUAN & DUKUNGAN",
                 style = MaterialTheme.typography.labelSmall.copy(
                     color         = MaterialTheme.colorScheme.primary.copy(alpha = 0.70f),
                     fontWeight    = FontWeight.Black,
@@ -543,171 +544,180 @@ private fun ContactDeveloper(
             )
         }
 
-        // Email card
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape    = RoundedCornerShape(16.dp),
-            color    = if (isDark)
-                Color(0xFF1C1408).copy(alpha = 0.6f)
-            else
-                Color.White,
-            tonalElevation = if (isDark) 0.dp else 1.dp,
-            shadowElevation = if (isDark) 0.dp else 2.dp,
-            border = androidx.compose.foundation.BorderStroke(
-                width = 1.dp,
-                color = if (isDark)
-                    LuxuryGold.copy(alpha = 0.12f)
-                else
-                    Color(0xFFE8DCC8).copy(alpha = 0.6f)
-            )
+        Row(
+            modifier            = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(
+            // ── Email card ──────────────────────────────────────────────
+            Surface(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = onEmailClick)
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalAlignment     = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                // Icon container
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(
-                            color = LuxuryGold.copy(alpha = 0.12f),
-                            shape = RoundedCornerShape(10.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector       = Icons.Filled.Email,
-                        contentDescription = "Email",
-                        tint              = LuxuryGold,
-                        modifier          = Modifier.size(20.dp)
+                    .weight(1f)
+                    .shadow(
+                        elevation = if (isDark) 0.dp else 8.dp,
+                        shape     = RoundedCornerShape(18.dp),
+                        ambientColor = if (isDark) Color.Transparent else Color(0xFF000000).copy(alpha = 0.08f),
+                        spotColor    = if (isDark) Color.Transparent else Color(0xFF000000).copy(alpha = 0.06f)
                     )
-                }
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text  = "Email",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color      = if (isDark)
-                                Color.White.copy(alpha = 0.45f)
-                            else
-                                Color(0xFF8B7355),
-                            fontSize   = 11.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    )
-                    Spacer(Modifier.height(2.dp))
-                    Text(
-                        text  = DEV_EMAIL,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color      = if (isDark)
-                                Color.White.copy(alpha = 0.85f)
-                            else
-                                Color(0xFF2A1F0E),
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize   = 14.sp
-                        )
-                    )
-                }
-
-                Icon(
-                    imageVector       = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = null,
-                    tint              = if (isDark)
-                        Color.White.copy(alpha = 0.20f)
+                    .clickable(onClick = onEmailClick),
+                shape    = RoundedCornerShape(18.dp),
+                color    = if (isDark)
+                    Color(0xFF1A150C)
+                else
+                    Color.White,
+                border = androidx.compose.foundation.BorderStroke(
+                    width = 1.dp,
+                    color = if (isDark)
+                        LuxuryGold.copy(alpha = 0.25f)
                     else
-                        Color(0xFFBFB08A),
-                    modifier          = Modifier
-                        .size(16.dp)
-                        .graphicsLayer(rotationZ = 180f)
+                        Color(0xFFE8DCC8).copy(alpha = 0.7f)
                 )
+            ) {
+                Column(
+                    modifier            = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 20.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Icon with glow ring
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .background(
+                                color = if (isDark)
+                                    LuxuryGold.copy(alpha = 0.12f)
+                                else
+                                    Color(0xFFFFF7E6),
+                                shape = CircleShape
+                            )
+                            .then(
+                                if (isDark) {
+                                    Modifier.shadow(
+                                        elevation = 16.dp,
+                                        shape     = CircleShape,
+                                        ambientColor = LuxuryGold.copy(alpha = 0.30f),
+                                        spotColor    = LuxuryGold.copy(alpha = 0.15f)
+                                    )
+                                } else Modifier
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector       = Icons.Filled.Email,
+                            contentDescription = null,
+                            tint              = if (isDark) LuxuryGold else Color(0xFF9A7535),
+                            modifier          = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        Text(
+                            text  = "Email Kami",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color   = if (isDark) Color.White.copy(alpha = 0.45f) else Color(0xFFA09480),
+                                fontSize = 10.sp
+                            )
+                        )
+                        Text(
+                            text  = "nurdincrs123@gmail.com",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color      = if (isDark) Color.White.copy(alpha = 0.85f) else Color(0xFF2A1F0E),
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize   = 12.sp
+                            ),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
             }
-        }
 
-        // WhatsApp card
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape    = RoundedCornerShape(16.dp),
-            color    = if (isDark)
-                Color(0xFF1C1408).copy(alpha = 0.6f)
-            else
-                Color.White,
-            tonalElevation = if (isDark) 0.dp else 1.dp,
-            shadowElevation = if (isDark) 0.dp else 2.dp,
-            border = androidx.compose.foundation.BorderStroke(
-                width = 1.dp,
-                color = if (isDark)
-                    Color(0xFF25D366).copy(alpha = 0.12f)
-                else
-                    Color(0xFFE8DCC8).copy(alpha = 0.6f)
-            )
-        ) {
-            Row(
+            // ── WhatsApp card ───────────────────────────────────────────
+            Surface(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = onWhatsAppClick)
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalAlignment     = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                // Icon container — WhatsApp green tint
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(
-                            color = Color(0xFF25D366).copy(alpha = 0.12f),
-                            shape = RoundedCornerShape(10.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector       = Icons.Filled.Phone,
-                        contentDescription = "WhatsApp",
-                        tint              = Color(0xFF25D366),
-                        modifier          = Modifier.size(20.dp)
+                    .weight(1f)
+                    .shadow(
+                        elevation = if (isDark) 0.dp else 8.dp,
+                        shape     = RoundedCornerShape(18.dp),
+                        ambientColor = if (isDark) Color.Transparent else Color(0xFF000000).copy(alpha = 0.08f),
+                        spotColor    = if (isDark) Color.Transparent else Color(0xFF000000).copy(alpha = 0.06f)
                     )
-                }
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text  = "WhatsApp",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color      = if (isDark)
-                                Color.White.copy(alpha = 0.45f)
-                            else
-                                Color(0xFF8B7355),
-                            fontSize   = 11.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    )
-                    Spacer(Modifier.height(2.dp))
-                    Text(
-                        text  = DEV_WHATSAPP,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color      = if (isDark)
-                                Color.White.copy(alpha = 0.85f)
-                            else
-                                Color(0xFF2A1F0E),
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize   = 14.sp
-                        )
-                    )
-                }
-
-                Icon(
-                    imageVector       = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = null,
-                    tint              = if (isDark)
-                        Color.White.copy(alpha = 0.20f)
+                    .clickable(onClick = onWhatsAppClick),
+                shape    = RoundedCornerShape(18.dp),
+                color    = if (isDark)
+                    Color(0xFF0D1A12)
+                else
+                    Color.White,
+                border = androidx.compose.foundation.BorderStroke(
+                    width = 1.dp,
+                    color = if (isDark)
+                        Color(0xFF25D366).copy(alpha = 0.30f)
                     else
-                        Color(0xFFBFB08A),
-                    modifier          = Modifier
-                        .size(16.dp)
-                        .graphicsLayer(rotationZ = 180f)
+                        Color(0xFFE8DCC8).copy(alpha = 0.7f)
                 )
+            ) {
+                Column(
+                    modifier            = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 20.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Icon with green glow ring (dark) or warm bg (light)
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .background(
+                                color = if (isDark)
+                                    Color(0xFF25D366).copy(alpha = 0.12f)
+                                else
+                                    Color(0xFFE8F5E9),
+                                shape = CircleShape
+                            )
+                            .then(
+                                if (isDark) {
+                                    Modifier.shadow(
+                                        elevation = 16.dp,
+                                        shape     = CircleShape,
+                                        ambientColor = Color(0xFF25D366).copy(alpha = 0.30f),
+                                        spotColor    = Color(0xFF25D366).copy(alpha = 0.15f)
+                                    )
+                                } else Modifier
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector       = Icons.Filled.Phone,
+                            contentDescription = null,
+                            tint              = if (isDark) Color(0xFF25D366) else Color(0xFF1B7A3D),
+                            modifier          = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        Text(
+                            text  = "WhatsApp",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color   = if (isDark) Color.White.copy(alpha = 0.45f) else Color(0xFFA09480),
+                                fontSize = 10.sp
+                            )
+                        )
+                        Text(
+                            text  = "0882 0009 79741",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color      = if (isDark) Color.White.copy(alpha = 0.85f) else Color(0xFF2A1F0E),
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize   = 12.sp
+                            ),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
             }
         }
     }

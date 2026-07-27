@@ -171,6 +171,9 @@ dependencies {
     implementation(libs.androidx.concurrent.futures)
     implementation(libs.guava)
 
+    // Kizitonwose Calendar
+    implementation("com.kizitonwose.calendar:compose:2.7.0")
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

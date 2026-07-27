@@ -113,6 +113,9 @@ sealed class Screen(val route: String) {
     object Absensi : Screen("absensi/{nis}") {
         fun createRoute(nis: String) = "absensi/$nis"
     }
+    object AbsensiLengkap : Screen("absensi_lengkap/{nis}") {
+        fun createRoute(nis: String) = "absensi_lengkap/$nis"
+    }
     object Quran : Screen("quran")
     object Qibla : Screen("qibla")
     object PrayerSchedule : Screen("prayer_schedule")
@@ -372,6 +375,18 @@ composable(Screen.Home.route) {
             AbsensiScreen(
                 santriNis = santriNis,
                 viewModel = absensiViewModel,
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = Screen.AbsensiLengkap.route,
+            arguments = listOf(navArgument("nis") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val santriNis = backStackEntry.arguments?.getString("nis") ?: return@composable
+            val absensiLengkapViewModel: com.alhasanah.alhasanahmedia.ui.absensilengkap.AbsensiLengkapViewModel = koinViewModel()
+            com.alhasanah.alhasanahmedia.ui.absensilengkap.AbsensiLengkapScreen(
+                santriNis = santriNis,
+                viewModel = absensiLengkapViewModel,
                 onBack = { navController.popBackStack() }
             )
         }

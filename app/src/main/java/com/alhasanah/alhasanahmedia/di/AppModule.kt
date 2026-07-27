@@ -49,6 +49,7 @@ val appModule = module {
     single<IbadahGuideRepository> { IbadahGuideRepositoryImpl(androidContext()) }
     single<IslamicCalendarRepository> { IslamicCalendarRepositoryImpl(get(), get()) }
     single<WeatherRepository> { WeatherRepositoryImpl(get()) }
+    single<AbsensiLengkapRepository> { AbsensiLengkapRepositoryImpl(get()) }
     single<FalakRepository> { FalakRepositoryImpl(androidContext(), get(), get()) }
     single { com.alhasanah.alhasanahmedia.domain.falak.HisabHilalEphemerisCalculator() }
     single { com.alhasanah.alhasanahmedia.domain.falak.GerhanaBulanEphemerisCalculator() }

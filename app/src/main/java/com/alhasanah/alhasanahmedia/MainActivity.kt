@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -1342,6 +1343,7 @@ fun DrawerBody(
     var drawerUpdateInfo by remember { mutableStateOf<com.alhasanah.alhasanahmedia.util.UpdateInfo?>(null) }
     var showUpdateResultDialog by remember { mutableStateOf(false) }
     var updateResultMessage by remember { mutableStateOf("") }
+    var absensiSubmenuExpanded by remember { mutableStateOf(false) }
     val showcaseScope = LocalShowcaseScope.current
 
     if (isLoggedIn) {
@@ -1402,8 +1404,14 @@ fun DrawerBody(
                 closeDrawer(); navController.navigate(Screen.SantriDetail.createRoute(activeSantriNis!!))
             }
         }
-        DrawerMenuItemElegant(icon = Icons.Outlined.CheckCircle, text = "Ringkasan Absensi", isEnabled = isNavEnabled) {
-            closeDrawer(); navController.navigate(Screen.Absensi.createRoute(activeSantriNis!!))
+        DrawerMenuItemElegant(icon = Icons.Outlined.CheckCircle, text = "Absensi", isEnabled = isNavEnabled, isExpandable = true, isExpanded = absensiSubmenuExpanded, onToggleExpand = { absensiSubmenuExpanded = !absensiSubmenuExpanded }) {}
+        if (absensiSubmenuExpanded) {
+            DrawerSubMenuItem(text = "Ringkasan Absensi", isEnabled = isNavEnabled) {
+                closeDrawer(); navController.navigate(Screen.Absensi.createRoute(activeSantriNis!!))
+            }
+            DrawerSubMenuItem(text = "Absensi Lengkap", isEnabled = isNavEnabled) {
+                closeDrawer(); navController.navigate(Screen.AbsensiLengkap.createRoute(activeSantriNis!!))
+            }
         }
         DrawerMenuItemElegant(icon = Icons.Outlined.MenuBook, text = "Progres Hafalan", isEnabled = isNavEnabled) {
             closeDrawer(); navController.navigate(Screen.Hafalan.createRoute(activeSantriNis!!))
@@ -1629,17 +1637,31 @@ fun DrawerMenuItemElegant(
     modifier : Modifier = Modifier,
     textColor: Color   = MaterialTheme.colorScheme.onSurface,
     iconColor: Color   = MaterialTheme.colorScheme.primary,
+    isExpandable: Boolean = false,
+    isExpanded: Boolean = false,
+    onToggleExpand: (() -> Unit)? = null,
     onClick  : () -> Unit
 ) {
     val contentAlpha   = if (isEnabled) 1.0f  else 0.35f
     val containerAlpha = if (isEnabled) 0.12f else 0.05f
+    val rotation by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        animationSpec = tween(durationMillis = 200),
+        label = "chevron"
+    )
 
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 4.dp, vertical = 1.5.dp)
             .clip(RoundedCornerShape(14.dp))
-            .clickable(enabled = isEnabled, onClick = onClick)
+            .clickable(enabled = isEnabled) {
+                if (isExpandable && onToggleExpand != null) {
+                    onToggleExpand()
+                } else {
+                    onClick()
+                }
+            }
             .padding(horizontal = 10.dp, vertical = 9.dp),
         verticalAlignment     = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp)
@@ -1668,6 +1690,56 @@ fun DrawerMenuItemElegant(
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontWeight = if (isEnabled) FontWeight.SemiBold else FontWeight.Normal,
                 color      = textColor.copy(alpha = contentAlpha)
+            ),
+            modifier = Modifier.weight(1f)
+        )
+
+        // Expand/Collapse chevron
+        if (isExpandable) {
+            Icon(
+                imageVector = Icons.Outlined.KeyboardArrowDown,
+                contentDescription = if (isExpanded) "Tutup" else "Buka",
+                tint = textColor.copy(alpha = contentAlpha * 0.7f),
+                modifier = Modifier
+                    .size(24.dp)
+                    .graphicsLayer { rotationZ = rotation }
+            )
+        }
+    }
+}
+
+@Composable
+fun DrawerSubMenuItem(
+    text     : String,
+    isEnabled: Boolean = true,
+    onClick  : () -> Unit
+) {
+    val contentAlpha = if (isEnabled) 1.0f else 0.35f
+    val textColor = MaterialTheme.colorScheme.onSurface
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 56.dp, end = 4.dp, top = 1.dp, bottom = 1.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .clickable(enabled = isEnabled, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 7.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(5.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = contentAlpha * 0.6f),
+                    shape = CircleShape
+                )
+        )
+        Text(
+            text  = text,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontWeight = if (isEnabled) FontWeight.Medium else FontWeight.Normal,
+                color      = textColor.copy(alpha = contentAlpha * 0.9f)
             )
         )
     }

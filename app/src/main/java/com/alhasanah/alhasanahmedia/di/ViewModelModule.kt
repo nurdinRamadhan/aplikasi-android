@@ -19,6 +19,7 @@ import com.alhasanah.alhasanahmedia.ui.islamiccalendar.IslamicCalendarViewModel
 import com.alhasanah.alhasanahmedia.ui.notifikasi.NotificationViewModel
 import com.alhasanah.alhasanahmedia.ui.keuangan.KeuanganViewModel
 import com.alhasanah.alhasanahmedia.ui.prayer.PrayerScheduleViewModel
+import com.alhasanah.alhasanahmedia.ui.absensilengkap.AbsensiLengkapViewModel
 import com.alhasanah.alhasanahmedia.ui.santri.AbsensiViewModel
 import com.alhasanah.alhasanahmedia.ui.santri.SantriActivityViewModel
 import com.alhasanah.alhasanahmedia.ui.santri.PrestasiViewModel
@@ -52,6 +53,7 @@ val viewModelModule = module {
     viewModelOf(::SantriActivityViewModel)
     viewModelOf(::PrestasiViewModel)
     viewModelOf(::AbsensiViewModel)
+    viewModelOf(::AbsensiLengkapViewModel)
     viewModelOf(::HomeViewModel)
     viewModelOf(::SantriListViewModel)
     viewModelOf(::NotificationViewModel)
