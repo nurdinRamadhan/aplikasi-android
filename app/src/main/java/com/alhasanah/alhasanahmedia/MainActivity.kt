@@ -824,9 +824,10 @@ private fun AlhasanahBottomAppBar(
             matchRoutes = setOf(Screen.Donasi.route)
         ),
         BottomAppBarItem(
-            label = "Tanya AI",
-            icon = Icons.Outlined.AutoAwesome,
-            route = Screen.RagChat.route
+            label = "Bantuan",
+            icon = Icons.Outlined.HelpOutline,
+            route = Screen.LaporanMasalah.route,
+            matchRoutes = setOf(Screen.LaporanMasalah.route, Screen.LaporanDetail.route)
         )
     )
 
@@ -1536,6 +1537,12 @@ fun DrawerBody(
                 }
             }
         }
+    )
+
+    DrawerMenuItemElegant(
+        icon    = Icons.Outlined.BugReport,
+        text    = "Bantuan & Masukan",
+        onClick = { closeDrawer(); navController.navigate(Screen.LaporanMasalah.route) }
     )
 
     DrawerMenuItemElegant(

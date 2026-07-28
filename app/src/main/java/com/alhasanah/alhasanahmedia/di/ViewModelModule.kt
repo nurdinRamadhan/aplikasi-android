@@ -11,6 +11,7 @@ import com.alhasanah.alhasanahmedia.ui.berita.BeritaDetailViewModel
 import com.alhasanah.alhasanahmedia.ui.devotion.DevotionViewModel
 import com.alhasanah.alhasanahmedia.ui.falak.FalakEphemerisViewModel
 import com.alhasanah.alhasanahmedia.ui.falak.GerhanaBulanViewModel
+import com.alhasanah.alhasanahmedia.ui.laporanmasalah.LaporanMasalahViewModel
 import com.alhasanah.alhasanahmedia.ui.falak.HisabHilalViewModel
 import com.alhasanah.alhasanahmedia.ui.hadith.HadithViewModel
 import com.alhasanah.alhasanahmedia.ui.home.HomeViewModel
@@ -74,4 +75,5 @@ val viewModelModule = module {
     viewModelOf(::FalakEphemerisViewModel)
     viewModelOf(::HisabHilalViewModel)
     viewModelOf(::GerhanaBulanViewModel)
+    viewModelOf(::LaporanMasalahViewModel)
 }

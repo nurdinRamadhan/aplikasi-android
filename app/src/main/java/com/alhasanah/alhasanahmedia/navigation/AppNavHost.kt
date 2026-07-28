@@ -5,6 +5,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +35,7 @@ import com.alhasanah.alhasanahmedia.ui.devotion.KitabKuningScreen
 import com.alhasanah.alhasanahmedia.ui.donasi.DonasiScreen
 import com.alhasanah.alhasanahmedia.ui.falak.FalakEphemerisScreen
 import com.alhasanah.alhasanahmedia.ui.falak.GerhanaBulanScreen
+import com.alhasanah.alhasanahmedia.ui.laporanmasalah.LaporanMasalahScreen
 import com.alhasanah.alhasanahmedia.ui.falak.HisabHilalScreen
 import com.alhasanah.alhasanahmedia.ui.hadith.HadithDetailScreen
 import com.alhasanah.alhasanahmedia.ui.hadith.HadithScreen
@@ -196,6 +198,10 @@ sealed class Screen(val route: String) {
         fun createRoute(nomor: Int) = "juz_detail/$nomor"
     }
     object TentangKami : Screen("tentang_kami")
+    object LaporanMasalah : Screen("laporan_masalah")
+    object LaporanDetail : Screen("laporan_detail/{laporanId}") {
+        fun createRoute(laporanId: String) = "laporan_detail/$laporanId"
+    }
 }
 
 @Composable
@@ -685,6 +691,32 @@ composable(Screen.Home.route) {
             com.alhasanah.alhasanahmedia.ui.about.TentangKamiScreen(
                 onBack = { navController.popBackStack() }
             )
+        }
+        composable(Screen.LaporanMasalah.route) {
+            val viewModel: com.alhasanah.alhasanahmedia.ui.laporanmasalah.LaporanMasalahViewModel = koinViewModel()
+            LaporanMasalahScreen(
+                onBack = { navController.popBackStack() },
+                onLaporanClick = { laporanId ->
+                    navController.navigate(Screen.LaporanDetail.createRoute(laporanId))
+                },
+                viewModel = viewModel
+            )
+        }
+        composable(
+            route = Screen.LaporanDetail.route,
+            arguments = listOf(navArgument("laporanId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val laporanId = backStackEntry.arguments?.getString("laporanId") ?: return@composable
+            val viewModel: com.alhasanah.alhasanahmedia.ui.laporanmasalah.LaporanMasalahViewModel = koinViewModel()
+            val laporans by viewModel.laporans.collectAsState()
+            val laporan = laporans.find { it.id == laporanId }
+
+            if (laporan != null) {
+                com.alhasanah.alhasanahmedia.ui.laporanmasalah.LaporanDetailScreen(
+                    laporan = laporan,
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }

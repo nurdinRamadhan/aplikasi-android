@@ -65,4 +65,5 @@ val appModule = module {
     single<AnnouncementRepository> { AnnouncementRepositoryImpl(get()) }
     single { com.alhasanah.alhasanahmedia.util.AnnouncementPreferences(androidContext()) }
     single { com.alhasanah.alhasanahmedia.data.repository.TutorialRepository(androidContext()) }
+    single<LaporanMasalahRepository> { LaporanMasalahRepositoryImpl(get()) }
 }
